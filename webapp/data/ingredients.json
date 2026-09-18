@@ -1,0 +1,1548 @@
+{
+  "schema": "FoodLens ingredient knowledge base (approximations, not medical advice)",
+  "num_classes": 101,
+  "calories_units": "kcal per typical serving",
+  "classes": {
+    "apple_pie": {
+      "calories": 350,
+      "ingredients": [
+        "apples",
+        "flour",
+        "butter",
+        "sugar",
+        "cinnamon",
+        "pie crust"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "baby_back_ribs": {
+      "calories": 450,
+      "ingredients": [
+        "pork ribs",
+        "bbq sauce",
+        "brown sugar",
+        "paprika",
+        "garlic",
+        "salt"
+      ],
+      "category": "Main",
+      "allergens": []
+    },
+    "baklava": {
+      "calories": 330,
+      "ingredients": [
+        "phyllo pastry",
+        "pistachios",
+        "walnuts",
+        "honey",
+        "butter",
+        "sugar syrup"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "nuts",
+        "dairy"
+      ]
+    },
+    "beef_carpaccio": {
+      "calories": 300,
+      "ingredients": [
+        "raw beef fillet",
+        "parmesan",
+        "arugula",
+        "olive oil",
+        "lemon",
+        "capers"
+      ],
+      "category": "Main",
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "beef_tartare": {
+      "calories": 280,
+      "ingredients": [
+        "raw beef",
+        "egg yolk",
+        "capers",
+        "shallots",
+        "mustard",
+        "sourdough toast"
+      ],
+      "category": "Main",
+      "allergens": [
+        "egg",
+        "gluten"
+      ]
+    },
+    "beet_salad": {
+      "calories": 180,
+      "ingredients": [
+        "beetroot",
+        "goat cheese",
+        "walnuts",
+        "arugula",
+        "olive oil",
+        "balsamic"
+      ],
+      "category": "Salad",
+      "allergens": [
+        "dairy",
+        "nuts"
+      ]
+    },
+    "beignets": {
+      "calories": 390,
+      "ingredients": [
+        "flour",
+        "yeast",
+        "milk",
+        "sugar",
+        "butter",
+        "powdered sugar"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "bibimbap": {
+      "calories": 520,
+      "ingredients": [
+        "rice",
+        "beef",
+        "vegetables",
+        "egg",
+        "gochujang",
+        "sesame oil",
+        "kimchi"
+      ],
+      "category": "Main",
+      "allergens": [
+        "egg",
+        "sesame"
+      ]
+    },
+    "bread_pudding": {
+      "calories": 320,
+      "ingredients": [
+        "bread",
+        "milk",
+        "eggs",
+        "sugar",
+        "butter",
+        "cinnamon",
+        "raisins"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "breakfast_burrito": {
+      "calories": 450,
+      "ingredients": [
+        "tortilla",
+        "eggs",
+        "potato",
+        "cheese",
+        "sausage",
+        "salsa"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "bruschetta": {
+      "calories": 220,
+      "ingredients": [
+        "baguette",
+        "tomatoes",
+        "garlic",
+        "basil",
+        "olive oil",
+        "balsamic"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    "caesar_salad": {
+      "calories": 360,
+      "ingredients": [
+        "romaine lettuce",
+        "croutons",
+        "parmesan",
+        "caesar dressing",
+        "anchovies",
+        "garlic"
+      ],
+      "category": "Salad",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg",
+        "fish"
+      ]
+    },
+    "cannoli": {
+      "calories": 280,
+      "ingredients": [
+        "ricotta",
+        "flour",
+        "sugar",
+        "chocolate chips",
+        "candied peel",
+        "pistachios"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "nuts"
+      ]
+    },
+    "caprese_salad": {
+      "calories": 250,
+      "ingredients": [
+        "tomatoes",
+        "mozzarella",
+        "basil",
+        "olive oil",
+        "balsamic",
+        "salt"
+      ],
+      "category": "Salad",
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "carrot_cake": {
+      "calories": 420,
+      "ingredients": [
+        "carrots",
+        "flour",
+        "walnuts",
+        "cream cheese",
+        "sugar",
+        "cinnamon"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg",
+        "nuts"
+      ]
+    },
+    "ceviche": {
+      "calories": 200,
+      "ingredients": [
+        "raw fish",
+        "lime juice",
+        "cilantro",
+        "red onion",
+        "chili",
+        "corn"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "fish"
+      ]
+    },
+    "cheese_plate": {
+      "calories": 400,
+      "ingredients": [
+        "assorted cheese",
+        "crackers",
+        "grapes",
+        "nuts",
+        "honey",
+        "figs"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "dairy",
+        "gluten",
+        "nuts"
+      ]
+    },
+    "cheesecake": {
+      "calories": 480,
+      "ingredients": [
+        "cream cheese",
+        "graham cracker crust",
+        "sugar",
+        "eggs",
+        "butter"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "dairy",
+        "egg",
+        "gluten"
+      ]
+    },
+    "chicken_curry": {
+      "calories": 460,
+      "ingredients": [
+        "chicken",
+        "turmeric",
+        "cumin",
+        "ginger",
+        "garlic",
+        "onion",
+        "coconut milk"
+      ],
+      "category": "Main",
+      "allergens": [
+        ""
+      ]
+    },
+    "chicken_quesadilla": {
+      "calories": 520,
+      "ingredients": [
+        "tortilla",
+        "chicken",
+        "cheddar",
+        "bell pepper",
+        "onion",
+        "salsa"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "chicken_wings": {
+      "calories": 430,
+      "ingredients": [
+        "chicken wings",
+        "buffalo sauce",
+        "butter",
+        "flour",
+        "celery",
+        "blue cheese"
+      ],
+      "category": "Main",
+      "allergens": [
+        "dairy",
+        "gluten"
+      ]
+    },
+    "chocolate_cake": {
+      "calories": 400,
+      "ingredients": [
+        "flour",
+        "cocoa",
+        "eggs",
+        "butter",
+        "sugar",
+        "milk",
+        "chocolate"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "chocolate_mousse": {
+      "calories": 350,
+      "ingredients": [
+        "chocolate",
+        "cream",
+        "eggs",
+        "sugar",
+        "butter"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "dairy",
+        "egg"
+      ]
+    },
+    "churros": {
+      "calories": 310,
+      "ingredients": [
+        "flour",
+        "sugar",
+        "cinnamon",
+        "oil",
+        "egg"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "egg"
+      ]
+    },
+    "clam_chowder": {
+      "calories": 380,
+      "ingredients": [
+        "clams",
+        "potatoes",
+        "cream",
+        "bacon",
+        "onion",
+        "butter"
+      ],
+      "category": "Soup",
+      "allergens": [
+        "dairy",
+        "shellfish",
+        "gluten"
+      ]
+    },
+    "club_sandwich": {
+      "calories": 510,
+      "ingredients": [
+        "bread",
+        "chicken",
+        "bacon",
+        "lettuce",
+        "tomato",
+        "mayonnaise",
+        "egg"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "crab_cakes": {
+      "calories": 360,
+      "ingredients": [
+        "crab meat",
+        "breadcrumbs",
+        "egg",
+        "mayonnaise",
+        "mustard",
+        "old bay"
+      ],
+      "category": "Main",
+      "allergens": [
+        "shellfish",
+        "gluten",
+        "egg"
+      ]
+    },
+    "creme_brulee": {
+      "calories": 310,
+      "ingredients": [
+        "cream",
+        "egg yolks",
+        "sugar",
+        "vanilla"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "dairy",
+        "egg"
+      ]
+    },
+    "croque_madame": {
+      "calories": 540,
+      "ingredients": [
+        "bread",
+        "ham",
+        "gruyere",
+        "bechamel",
+        "egg",
+        "butter"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "cup_cakes": {
+      "calories": 350,
+      "ingredients": [
+        "flour",
+        "sugar",
+        "butter",
+        "eggs",
+        "milk",
+        "frosting"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "deviled_eggs": {
+      "calories": 190,
+      "ingredients": [
+        "eggs",
+        "mayonnaise",
+        "mustard",
+        "paprika",
+        "vinegar"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "egg"
+      ]
+    },
+    "donuts": {
+      "calories": 390,
+      "ingredients": [
+        "flour",
+        "sugar",
+        "yeast",
+        "milk",
+        "egg",
+        "glaze"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "dumplings": {
+      "calories": 320,
+      "ingredients": [
+        "flour",
+        "pork",
+        "cabbage",
+        "ginger",
+        "garlic",
+        "soy sauce"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    "edamame": {
+      "calories": 190,
+      "ingredients": [
+        "soybeans",
+        "salt",
+        "sesame oil"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "soy",
+        "sesame"
+      ]
+    },
+    "eggs_benedict": {
+      "calories": 520,
+      "ingredients": [
+        "english muffin",
+        "eggs",
+        "ham",
+        "hollandaise",
+        "butter",
+        "chives"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "escargots": {
+      "calories": 260,
+      "ingredients": [
+        "snails",
+        "garlic",
+        "butter",
+        "parsley"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "falafel": {
+      "calories": 330,
+      "ingredients": [
+        "chickpeas",
+        "onion",
+        "garlic",
+        "parsley",
+        "cumin",
+        "tahini"
+      ],
+      "category": "Main",
+      "allergens": [
+        "sesame"
+      ]
+    },
+    "filet_mignon": {
+      "calories": 580,
+      "ingredients": [
+        "beef tenderloin",
+        "butter",
+        "thyme",
+        "garlic",
+        "salt",
+        "pepper"
+      ],
+      "category": "Main",
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "fish_and_chips": {
+      "calories": 540,
+      "ingredients": [
+        "cod",
+        "beer batter",
+        "potatoes",
+        "flour",
+        "malt vinegar",
+        "peas"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "fish"
+      ]
+    },
+    "foie_gras": {
+      "calories": 420,
+      "ingredients": [
+        "duck liver",
+        "brioche",
+        "fig",
+        "salt",
+        "pepper"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "gluten",
+        ""
+      ]
+    },
+    "french_fries": {
+      "calories": 350,
+      "ingredients": [
+        "potatoes",
+        "oil",
+        "salt"
+      ],
+      "category": "Side",
+      "allergens": []
+    },
+    "french_onion_soup": {
+      "calories": 320,
+      "ingredients": [
+        "onions",
+        "beef broth",
+        "baguette",
+        "gruyere",
+        "butter"
+      ],
+      "category": "Soup",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "french_toast": {
+      "calories": 380,
+      "ingredients": [
+        "bread",
+        "egg",
+        "milk",
+        "cinnamon",
+        "butter",
+        "maple syrup"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "fried_calamari": {
+      "calories": 380,
+      "ingredients": [
+        "squid",
+        "flour",
+        "egg",
+        "oil",
+        "lemon",
+        "marinara"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "shellfish",
+        "gluten",
+        "egg"
+      ]
+    },
+    "fried_rice": {
+      "calories": 420,
+      "ingredients": [
+        "rice",
+        "egg",
+        "soy sauce",
+        "scallions",
+        "peas",
+        "sesame oil"
+      ],
+      "category": "Main",
+      "allergens": [
+        "egg",
+        "soy"
+      ]
+    },
+    "frozen_yogurt": {
+      "calories": 220,
+      "ingredients": [
+        "yogurt",
+        "sugar",
+        "fruit toppings"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "garlic_bread": {
+      "calories": 280,
+      "ingredients": [
+        "baguette",
+        "butter",
+        "garlic",
+        "parsley"
+      ],
+      "category": "Side",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "gnocchi": {
+      "calories": 430,
+      "ingredients": [
+        "potatoes",
+        "flour",
+        "egg",
+        "tomato sauce",
+        "parmesan"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "greek_salad": {
+      "calories": 240,
+      "ingredients": [
+        "tomatoes",
+        "cucumber",
+        "olives",
+        "feta",
+        "red onion",
+        "olive oil"
+      ],
+      "category": "Salad",
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "grilled_cheese_sandwich": {
+      "calories": 430,
+      "ingredients": [
+        "bread",
+        "cheese",
+        "butter"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "grilled_salmon": {
+      "calories": 380,
+      "ingredients": [
+        "salmon",
+        "olive oil",
+        "lemon",
+        "dill",
+        "garlic"
+      ],
+      "category": "Main",
+      "allergens": [
+        "fish"
+      ]
+    },
+    "guacamole": {
+      "calories": 180,
+      "ingredients": [
+        "avocado",
+        "lime",
+        "tomato",
+        "onion",
+        "cilantro",
+        "jalapeno"
+      ],
+      "category": "Appetizer",
+      "allergens": []
+    },
+    "gyoza": {
+      "calories": 300,
+      "ingredients": [
+        "flour",
+        "pork",
+        "cabbage",
+        "ginger",
+        "soy sauce",
+        "wonton wrappers"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    "hamburger": {
+      "calories": 550,
+      "ingredients": [
+        "beef patty",
+        "bun",
+        "cheddar",
+        "lettuce",
+        "tomato",
+        "ketchup"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "hot_and_sour_soup": {
+      "calories": 220,
+      "ingredients": [
+        "tofu",
+        "mushrooms",
+        "vinegar",
+        "chili",
+        "egg",
+        "bamboo shoots"
+      ],
+      "category": "Soup",
+      "allergens": [
+        "egg",
+        "soy"
+      ]
+    },
+    "hot_dog": {
+      "calories": 400,
+      "ingredients": [
+        "frankfurter",
+        "bun",
+        "mustard",
+        "ketchup",
+        "onions"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    "huevos_rancheros": {
+      "calories": 460,
+      "ingredients": [
+        "eggs",
+        "tortilla",
+        "salsa",
+        "beans",
+        "cheese",
+        "cilantro"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "hummus": {
+      "calories": 200,
+      "ingredients": [
+        "chickpeas",
+        "tahini",
+        "olive oil",
+        "garlic",
+        "lemon"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "sesame"
+      ]
+    },
+    "ice_cream": {
+      "calories": 270,
+      "ingredients": [
+        "cream",
+        "milk",
+        "sugar",
+        "vanilla"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "lasagna": {
+      "calories": 540,
+      "ingredients": [
+        "pasta",
+        "ground beef",
+        "tomato sauce",
+        "ricotta",
+        "mozzarella",
+        "parmesan"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "lobster_bisque": {
+      "calories": 390,
+      "ingredients": [
+        "lobster",
+        "cream",
+        "butter",
+        "onion",
+        "tomato paste",
+        "brandy"
+      ],
+      "category": "Soup",
+      "allergens": [
+        "dairy",
+        "shellfish"
+      ]
+    },
+    "lobster_roll_sandwich": {
+      "calories": 460,
+      "ingredients": [
+        "lobster",
+        "butter",
+        "hot dog bun",
+        "mayonnaise",
+        "lemon"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "shellfish"
+      ]
+    },
+    "macaroni_and_cheese": {
+      "calories": 520,
+      "ingredients": [
+        "pasta",
+        "cheddar",
+        "milk",
+        "butter",
+        "flour"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "macarons": {
+      "calories": 290,
+      "ingredients": [
+        "almond flour",
+        "egg whites",
+        "sugar",
+        "buttercream"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "nuts",
+        "egg",
+        "dairy"
+      ]
+    },
+    "miso_soup": {
+      "calories": 120,
+      "ingredients": [
+        "miso paste",
+        "tofu",
+        "seaweed",
+        "scallions",
+        "dashi"
+      ],
+      "category": "Soup",
+      "allergens": [
+        "soy"
+      ]
+    },
+    "mussels": {
+      "calories": 360,
+      "ingredients": [
+        "mussels",
+        "white wine",
+        "garlic",
+        "butter",
+        "shallots",
+        "parsley"
+      ],
+      "category": "Main",
+      "allergens": [
+        "shellfish",
+        "dairy"
+      ]
+    },
+    "nachos": {
+      "calories": 560,
+      "ingredients": [
+        "tortilla chips",
+        "cheese",
+        "jalapenos",
+        "beans",
+        "guacamole",
+        "sour cream"
+      ],
+      "category": "Snack",
+      "allergens": [
+        "dairy",
+        "gluten"
+      ]
+    },
+    "omelette": {
+      "calories": 280,
+      "ingredients": [
+        "eggs",
+        "cheese",
+        "butter",
+        "vegetables",
+        "herbs"
+      ],
+      "category": "Main",
+      "allergens": [
+        "egg",
+        "dairy"
+      ]
+    },
+    "onion_rings": {
+      "calories": 340,
+      "ingredients": [
+        "onions",
+        "flour",
+        "beer batter",
+        "oil"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    "oysters": {
+      "calories": 180,
+      "ingredients": [
+        "oysters",
+        "lemon",
+        "mignonette"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "shellfish"
+      ]
+    },
+    "pad_thai": {
+      "calories": 480,
+      "ingredients": [
+        "rice noodles",
+        "shrimp",
+        "egg",
+        "bean sprouts",
+        "peanuts",
+        "fish sauce"
+      ],
+      "category": "Main",
+      "allergens": [
+        "egg",
+        "peanuts",
+        "fish"
+      ]
+    },
+    "paella": {
+      "calories": 520,
+      "ingredients": [
+        "rice",
+        "saffron",
+        "shrimp",
+        "chicken",
+        "squid",
+        "peas"
+      ],
+      "category": "Main",
+      "allergens": [
+        "shellfish"
+      ]
+    },
+    "pancakes": {
+      "calories": 350,
+      "ingredients": [
+        "flour",
+        "milk",
+        "egg",
+        "butter",
+        "maple syrup"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "panna_cotta": {
+      "calories": 320,
+      "ingredients": [
+        "cream",
+        "milk",
+        "sugar",
+        "gelatin",
+        "vanilla"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "peking_duck": {
+      "calories": 480,
+      "ingredients": [
+        "duck",
+        "pancakes",
+        "hoisin",
+        "scallions",
+        "cucumber"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    "pho": {
+      "calories": 320,
+      "ingredients": [
+        "rice noodles",
+        "beef",
+        "broth",
+        "basil",
+        "bean sprouts",
+        "lime"
+      ],
+      "category": "Soup",
+      "allergens": [
+        "gluten-free"
+      ]
+    },
+    "pizza": {
+      "calories": 480,
+      "ingredients": [
+        "dough",
+        "tomato sauce",
+        "mozzarella",
+        "olive oil",
+        "basil"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "pork_chop": {
+      "calories": 420,
+      "ingredients": [
+        "pork chop",
+        "butter",
+        "garlic",
+        "rosemary"
+      ],
+      "category": "Main",
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "poutine": {
+      "calories": 580,
+      "ingredients": [
+        "fries",
+        "cheese curds",
+        "gravy"
+      ],
+      "category": "Main",
+      "allergens": [
+        "dairy",
+        "gluten"
+      ]
+    },
+    "prime_rib": {
+      "calories": 700,
+      "ingredients": [
+        "beef rib roast",
+        "rosemary",
+        "garlic",
+        "salt",
+        "pepper"
+      ],
+      "category": "Main",
+      "allergens": []
+    },
+    "pulled_pork_sandwich": {
+      "calories": 450,
+      "ingredients": [
+        "pork shoulder",
+        "bbq sauce",
+        "bun",
+        "coleslaw"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    "ramen": {
+      "calories": 420,
+      "ingredients": [
+        "noodles",
+        "broth",
+        "pork belly",
+        "egg",
+        "scallions",
+        "nori"
+      ],
+      "category": "Soup",
+      "allergens": [
+        "gluten",
+        "egg",
+        "soy"
+      ]
+    },
+    "ravioli": {
+      "calories": 420,
+      "ingredients": [
+        "pasta",
+        "ricotta",
+        "spinach",
+        "tomato sauce",
+        "parmesan"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "red_velvet_cake": {
+      "calories": 420,
+      "ingredients": [
+        "flour",
+        "buttermilk",
+        "cocoa",
+        "butter",
+        "cream cheese frosting"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "risotto": {
+      "calories": 440,
+      "ingredients": [
+        "arborio rice",
+        "chicken broth",
+        "parmesan",
+        "butter",
+        "wine",
+        "onion"
+      ],
+      "category": "Main",
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "samosa": {
+      "calories": 280,
+      "ingredients": [
+        "flour",
+        "potatoes",
+        "peas",
+        "spices",
+        "oil"
+      ],
+      "category": "Snack",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    "sashimi": {
+      "calories": 180,
+      "ingredients": [
+        "raw fish",
+        "soy sauce",
+        "wasabi",
+        "ginger"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "fish",
+        "soy"
+      ]
+    },
+    "scallops": {
+      "calories": 250,
+      "ingredients": [
+        "scallops",
+        "butter",
+        "garlic",
+        "lemon"
+      ],
+      "category": "Main",
+      "allergens": [
+        "shellfish",
+        "dairy"
+      ]
+    },
+    "seaweed_salad": {
+      "calories": 130,
+      "ingredients": [
+        "seaweed",
+        "sesame oil",
+        "soy sauce",
+        "rice vinegar"
+      ],
+      "category": "Salad",
+      "allergens": [
+        "soy",
+        "sesame"
+      ]
+    },
+    "shrimp_and_grits": {
+      "calories": 460,
+      "ingredients": [
+        "shrimp",
+        "grits",
+        "bacon",
+        "cheddar",
+        "butter",
+        "lemon"
+      ],
+      "category": "Main",
+      "allergens": [
+        "shellfish",
+        "dairy"
+      ]
+    },
+    "spaghetti_bolognese": {
+      "calories": 520,
+      "ingredients": [
+        "spaghetti",
+        "ground beef",
+        "tomato sauce",
+        "onion",
+        "parmesan"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "spaghetti_carbonara": {
+      "calories": 580,
+      "ingredients": [
+        "spaghetti",
+        "eggs",
+        "pancetta",
+        "pecorino",
+        "black pepper"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "egg",
+        "dairy"
+      ]
+    },
+    "spring_rolls": {
+      "calories": 250,
+      "ingredients": [
+        "rice paper",
+        "shrimp",
+        "vegetables",
+        "rice noodles",
+        "dipping sauce"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "shellfish"
+      ]
+    },
+    "steak": {
+      "calories": 600,
+      "ingredients": [
+        "beef steak",
+        "butter",
+        "thyme",
+        "garlic"
+      ],
+      "category": "Main",
+      "allergens": []
+    },
+    "strawberry_shortcake": {
+      "calories": 380,
+      "ingredients": [
+        "cake",
+        "strawberries",
+        "whipped cream",
+        "sugar"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    },
+    "sushi": {
+      "calories": 320,
+      "ingredients": [
+        "rice",
+        "raw fish",
+        "seaweed",
+        "soy sauce",
+        "wasabi"
+      ],
+      "category": "Main",
+      "allergens": [
+        "fish",
+        "soy"
+      ]
+    },
+    "tacos": {
+      "calories": 400,
+      "ingredients": [
+        "tortilla",
+        "beef",
+        "lettuce",
+        "cheese",
+        "salsa",
+        "cilantro"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy"
+      ]
+    },
+    "takoyaki": {
+      "calories": 300,
+      "ingredients": [
+        "batter",
+        "octopus",
+        "scallions",
+        "benito flakes",
+        "takoyaki sauce"
+      ],
+      "category": "Snack",
+      "allergens": [
+        "gluten",
+        "shellfish",
+        "egg"
+      ]
+    },
+    "tiramisu": {
+      "calories": 340,
+      "ingredients": [
+        "mascarpone",
+        "ladyfingers",
+        "coffee",
+        "cocoa",
+        "egg yolk"
+      ],
+      "category": "Dessert",
+      "allergens": [
+        "dairy",
+        "egg",
+        "gluten"
+      ]
+    },
+    "tuna_tartare": {
+      "calories": 240,
+      "ingredients": [
+        "raw tuna",
+        "sesame oil",
+        "soy sauce",
+        "avocado",
+        "scallions"
+      ],
+      "category": "Appetizer",
+      "allergens": [
+        "fish",
+        "soy",
+        "sesame"
+      ]
+    },
+    "waffles": {
+      "calories": 360,
+      "ingredients": [
+        "flour",
+        "milk",
+        "egg",
+        "butter",
+        "maple syrup"
+      ],
+      "category": "Main",
+      "allergens": [
+        "gluten",
+        "dairy",
+        "egg"
+      ]
+    }
+  }
+}

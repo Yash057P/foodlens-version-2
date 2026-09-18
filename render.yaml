@@ -1,0 +1,14 @@
+# Render blueprint for FoodLens v2 (foodlens2)
+# Deploys the Docker image; scale up the plan if your env requires it.
+services:
+  - type: web
+    name: foodlens2
+    runtime: docker
+    plan: free
+    dockerfilePath: Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: KERAS_BACKEND
+        value: tensorflow
+      - key: PORT
+        value: 5000

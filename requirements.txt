@@ -1,0 +1,10 @@
+torch==2.6.0+cu124 --index-url https://download.pytorch.org/whl/cu124
+keras>=3.15
+numpy
+pandas
+pillow
+scikit-learn
+matplotlib
+seaborn
+streamlit>=1.64
+requests
