@@ -16,6 +16,7 @@ __pycache__/
 # Local results / figures
 results/
 *.log
+*.log.err
 *.npz
 
 # Root-level duplicate of model (canonical copy lives in webapp/models)
