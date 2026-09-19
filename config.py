@@ -1,9 +1,8 @@
 """FoodLens v2 - shared configuration.
 
-Follows DLProjectSynopsis (Sem VII 2026-27):
 - TensorFlow/Keras API (Keras 3, PyTorch backend) - see README for rationale.
-- 20-class subset (synopsis allows a reduced scope; results will NOT be
-  described as a full Food-101 benchmark).
+- 20-class subset used for the development baseline (results are not described
+  as a full Food-101 benchmark; the shipped model is trained on all 101 classes).
 - Stratified per-class split: 600 train / 150 val / 250 test (official test
   untouched during development).
 """
