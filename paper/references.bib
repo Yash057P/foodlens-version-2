@@ -31,36 +31,126 @@
 @inproceedings{food101,
   author    = {Bossard, Lukas and Guillaumin, Matthieu and Van Gool, Luc},
   title     = {Food-101 --- Mining Discriminative Components with Random Forests},
-  booktitle = {European Conference on Computer Vision (ECCV)},
+  booktitle = {Proceedings of the European Conference on Computer Vision (ECCV)},
   pages     = {446--461},
   year      = {2014},
   doi       = {10.1007/978-3-319-10599-4_29},
-  note      = {Official data set: \url{https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/}}
+  note      = {Official dataset: \url{https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/}}
 }
 
 @misc{food101torch,
-  author = {PyTorch Contributors},
-  title  = {Food101 dataset implementation},
-  howpublished = {Torchvision documentation},
-  year   = {2026},
-  note   = {\url{https://docs.pytorch.org/vision/2.0/_modules/torchvision/datasets/food101.html}. Accessed September 5, 2026. Used to verify dataset structure, not as a requirement to use PyTorch.}
+  author       = {{PyTorch Contributors}},
+  title        = {Food101 Dataset Implementation},
+  howpublished = {Torchvision Documentation},
+  year         = {2024},
+  note         = {\url{https://docs.pytorch.org/vision/2.0/_modules/torchvision/datasets/food101.html}}
 }
 
 @misc{kerasapps,
-  author = {Keras Contributors},
-  title  = {Keras {A}pplications},
-  howpublished = {Official pretrained-model documentation and architecture references: ResNet, MobileNet, DenseNet, EfficientNet},
-  year   = {2026},
-  note   = {\url{https://keras.io/api/applications/}. Accessed September 5, 2026.}
+  author       = {{Keras Contributors}},
+  title        = {Keras Applications: Pretrained Models and Architectures},
+  howpublished = {Keras Documentation},
+  year         = {2024},
+  note         = {\url{https://keras.io/api/applications/}}
 }
 
 @inproceedings{guo2017,
   author    = {Guo, Chuan and Pleiss, Geoff and Sun, Yu and Weinberger, Kilian Q.},
   title     = {On Calibration of Modern Neural Networks},
-  booktitle = {Proceedings of the 34th International Conference on Machine Learning},
-  series    = {PMLR},
+  booktitle = {Proceedings of the 34th International Conference on Machine Learning (ICML)},
+  series    = {Proceedings of Machine Learning Research},
   volume    = {70},
   pages     = {1321--1330},
+  year      = {2017}
+}
+
+@inproceedings{tan2019efficientnet,
+  author    = {Tan, Mingxing and Le, Quoc V.},
+  title     = {{EfficientNet}: Rethinking Model Scaling for Convolutional Neural Networks},
+  booktitle = {Proceedings of the 36th International Conference on Machine Learning (ICML)},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {97},
+  pages     = {6105--6114},
+  year      = {2019}
+}
+
+@inproceedings{tan2021efficientnetv2,
+  author    = {Tan, Mingxing and Le, Quoc V.},
+  title     = {{EfficientNetV2}: Smaller Models and Faster Training},
+  booktitle = {Proceedings of the 38th International Conference on Machine Learning (ICML)},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {139},
+  pages     = {10096--10106},
+  year      = {2021}
+}
+
+@inproceedings{he2016deep,
+  author    = {He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+  title     = {Deep Residual Learning for Image Recognition},
+  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {770--778},
+  year      = {2016},
+  doi       = {10.1109/CVPR.2016.90}
+}
+
+@inproceedings{sandler2018mobilenetv2,
+  author    = {Sandler, Mark and Howard, Andrew and Zhu, Menglong and Zhmoginov, Andrey and Chen, Liang-Chieh},
+  title     = {{MobileNetV2}: Inverted Residuals and Linear Bottlenecks},
+  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {4510--4520},
+  year      = {2018},
+  doi       = {10.1109/CVPR.2018.00474}
+}
+
+@inproceedings{huang2017densely,
+  author    = {Huang, Gao and Liu, Zhuang and Van Der Maaten, Laurens and Weinberger, Kilian Q.},
+  title     = {Densely Connected Convolutional Networks},
+  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {4700--4708},
   year      = {2017},
-  note      = {\url{https://proceedings.mlr.press/v70/guo17a.html}}
+  doi       = {10.1109/CVPR.2017.243}
+}
+
+@inproceedings{deng2009imagenet,
+  author    = {Deng, Jia and Dong, Wei and Socher, Richard and Li, Li-Jia and Li, Kai and Fei-Fei, Li},
+  title     = {{ImageNet}: A Large-Scale Hierarchical Image Database},
+  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {248--255},
+  year      = {2009},
+  doi       = {10.1109/CVPR.2009.5206848}
+}
+
+@article{lowe2004distinctive,
+  author    = {Lowe, David G.},
+  title     = {Distinctive Image Features from Scale-Invariant Keypoints},
+  journal   = {International Journal of Computer Vision},
+  volume    = {60},
+  number    = {2},
+  pages     = {91--110},
+  year      = {2004},
+  doi       = {10.1023/B:VISI.0000029664.99615.94}
+}
+
+@inproceedings{dalal2005histograms,
+  author    = {Dalal, Navneet and Triggs, Bill},
+  title     = {Histograms of Oriented Gradients for Human Detection},
+  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  volume    = {1},
+  pages     = {886--893},
+  year      = {2005},
+  doi       = {10.1109/CVPR.2005.177}
+}
+
+@inproceedings{kingma2014adam,
+  author    = {Kingma, Diederik P. and Ba, Jimmy},
+  title     = {Adam: A Method for Stochastic Optimization},
+  booktitle = {Proceedings of the 3rd International Conference on Learning Representations (ICLR)},
+  year      = {2015}
+}
+
+@inproceedings{kingma2015adam,
+  author    = {Kingma, Diederik P. and Ba, Jimmy},
+  title     = {Adam: A Method for Stochastic Optimization},
+  booktitle = {Proceedings of the 3rd International Conference on Learning Representations (ICLR)},
+  year      = {2015}
 }

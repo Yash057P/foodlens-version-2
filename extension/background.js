@@ -56,3 +56,4 @@ async function analyzeImage(imageUrl, tab) {
     });
   }
 }
+

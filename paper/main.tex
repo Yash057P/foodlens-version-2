@@ -1,5 +1,6 @@
 \documentclass[conference]{IEEEtran}
 \usepackage{cite}
+\usepackage{url}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{graphicx}
@@ -9,11 +10,12 @@
 \usepackage{longtable}
 \usepackage{tikz}
 \usepackage{lipsum}
+\usepackage{hyperref}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds}
 
 \begin{document}
 
-\title{FoodLens: An End-to-End Deep Learning Product for Smart Food Recognition and Dietary Analysis}
+\title{FoodLens: An EfficientNet-Based System for Food Recognition with Confidence-Aware Dietary Information Retrieval}
 
 \author{\IEEEauthorblockN{Yash Patil, Sarthak Kulkarni, Tanay Shinde, Harshad Patekar}
 \IEEEauthorblockA{Department of Information Technology\\
@@ -23,189 +25,288 @@ Project Guide: Dr.~Sushopti Gawade}}
 \maketitle
 
 \begin{abstract}
-FoodLens is an end-to-end image-based food recognition product designed to identify dishes and provide dietary context. Moving beyond theoretical benchmarks, this project implements a complete product pipeline: from raw image input to deep learning processing, culminating in a responsive Web API and a browser extension. The system utilizes EfficientNetB0 for feature extraction and classification across 101 food categories. To ensure reliability as a software product, we implement three core algorithmic pipelines: (1) Deep Learning Classification, (2) Confidence and Ambiguity Detection to prevent hallucinations, and (3) a Nutrition and Allergen Retrieval Engine. Evaluated on a 25,250-image test set, the core model achieved 73.85\% Top-1 and 88.44\% Top-3 accuracy. The final product is deployed as a Dockerized Flask application, demonstrating a complete, user-facing artificial intelligence software solution. This paper details the architecture, mathematical foundation, and extensive evaluation of the production system.
+Image-based dietary assessment requires addressing high intra-class visual variance, subtle inter-class distinctions, and downstream prediction safety. This paper presents FoodLens, an end-to-end deep learning system that couples convolutional food classification with confidence-aware prediction and deterministic dietary information retrieval. FoodLens employs an EfficientNetB0 backbone optimized through a two-phase transfer learning strategy on the 101-class Food-101 benchmark. To guard against uncertain and visually ambiguous inputs, the inference pipeline integrates a 3-way Test-Time Augmentation (TTA) batching scheme and a dual-threshold warning mechanism with confidence threshold $\tau = 0.45$ and ambiguity margin $\Delta = 0.10$. Nutritional and allergen attributes are resolved via deterministic key-indexed database lookup, preventing generative attribute fabrication. Evaluated on the official 25,250-image Food-101 held-out test set, the system achieves 73.85\% Top-1, 88.44\% Top-3, and 92.65\% Top-5 accuracy, with a macro F1-score of 73.74\%. The deployed model requires 4.08M parameters and achieves an average CPU inference latency of 700.04~ms, offering a favorable efficiency trade-off compared to DenseNet121 (7.06M parameters, 1289.39~ms CPU latency) for client-server web and browser extension deployment.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Food recognition, EfficientNet, Flask, Artificial Intelligence, Product Development, Neural Networks, Dietary Analysis.
+Food recognition, image classification, convolutional neural networks, transfer learning, EfficientNet, uncertainty estimation, dietary information retrieval.
 \end{IEEEkeywords}
 
 \section{Introduction}
-Real-world application of deep learning requires moving beyond isolated model training and integrating neural networks into robust, user-facing products. Food recognition presents a unique challenge due to high intra-class visual variance (e.g., different types of pizza) and inter-class similarity (e.g., beef tartare vs. tuna tartare). While many academic approaches focus strictly on classification metrics, consumer applications require safety rails against out-of-distribution inputs and actionable dietary information.
+Automated dietary assessment through computer vision has emerged as an essential tool for personal nutrition tracking, chronic disease management, and public health analytics. However, food recognition presents distinctive visual challenges that set it apart from standard object classification \cite{food101}. Deformable culinary textures, non-rigid geometries, diverse preparation techniques, and varied plating arrangements induce severe intra-class variability. Concurrently, distinct food categories frequently exhibit nearly identical visual appearances---such as beef tartare versus tuna tartare, or steak versus filet mignon---generating substantial inter-class ambiguity.
 
-This project introduces FoodLens, a `mini-product'' focused on the complete input-processing-output lifecycle. Our primary objective is to deliver a functional software system. The system integrates a trained Convolutional Neural Network (CNN) with a robust Web API, a browser-based side panel UI, a threshold-based warning algorithm, and an ingredient mapping system that estimates calories and allergens.
+Traditional computer vision pipelines relied heavily on handcrafted local descriptors such as Scale-Invariant Feature Transform (SIFT) \cite{lowe2004distinctive} and Histograms of Oriented Gradients (HOG) \cite{dalal2005histograms}. While foundational, these representations struggled to capture the complex, non-linear visual distributions characteristic of prepared meals. The advent of deep convolutional neural networks (CNNs) pretrained on large-scale datasets such as ImageNet \cite{deng2009imagenet} revolutionized the domain by enabling hierarchical visual representations. Recent studies have demonstrated the efficacy of transfer learning across various food image classification benchmarks \cite{suddul2023,abiyev2024,razia2024}.
 
-This paper is structured to extensively document the product. Section II reviews related work in dietary assessment. Section III details the three core algorithms and system architecture. Section IV presents a massive, per-class evaluation of the EfficientNet engine. Finally, Section V concludes the project.
+Nevertheless, translating theoretical classification benchmarks into practical, interactive software introduces severe operational challenges. First, standard closed-set softmax classifiers yield forced categorical predictions even when presented with ambiguous or out-of-distribution inputs. Without explicit uncertainty quantification, an overconfident model risks conveying false dietary context. Second, while modern generative multi-modal models can synthesize recipes, they are prone to generative fabrication---inventing nonexistent ingredients or omitting allergens---which poses acute health risks for individuals with dietary restrictions. Furthermore, large generative models impose latency and hardware demands that hinder responsive web deployment.
+
+To resolve these challenges, this paper presents FoodLens, an integrated system combining deep convolutional classification, uncertainty-aware prediction rails, and deterministic nutritional knowledge retrieval. The primary contributions of this work are fourfold:
+\begin{enumerate}
+    \item \textbf{Empirical Architectural Benchmarking:} We systematically evaluate five candidate architectures on the Food-101 benchmark, establishing that EfficientNetB0 \cite{tan2019efficientnet} delivers a Pareto-efficient balance between classification accuracy, parameter volume, and CPU inference latency relative to deeper backbones such as DenseNet121 \cite{huang2017densely} and ResNet50 \cite{he2016deep}.
+    \item \textbf{Dual-Threshold Uncertainty Rails:} We formulate a deterministic confidence and ambiguity scoring mechanism ($\tau = 0.45, \Delta = 0.10$) that flags low-confidence or closely competing predictions, filtering out ambiguous queries and boosting retained Top-1 accuracy to 81.93\%.
+    \item \textbf{Deterministic Knowledge Retrieval:} We pair visual classification with a structured key-indexed nutritional database, eliminating generative attribute fabrication while delivering rapid, constant-time ingredient and allergen lookup.
+    \item \textbf{Interactive Client-Server Implementation:} We construct and evaluate an end-to-end prototype comprising a stateless Flask REST API backend and a Manifest V3 browser extension client supporting in-browser dietary inspection via side panel interaction.
+\end{enumerate}
+
+The remainder of this paper is organized as follows: Section~II surveys related work; Section~III details the system architecture; Section~IV presents the mathematical methodology; Section~V describes the experimental setup; Section~VI presents empirical results and ablation studies; Section~VII discusses deployment, privacy, and system limitations; Section~VIII concludes the paper.
 
 \section{Related Work}
-The automatic recognition of food items from images has seen significant advancement with the advent of deep Convolutional Neural Networks (CNNs). Early works relied on handcrafted features such as SIFT and HOG, which struggled with the deformable nature of food. The introduction of the Food-101 dataset provided a standardized benchmark for deep learning applications.
+\subsection{Food Recognition Benchmarks and Visual Representations}
+Food image analysis has matured from early experiments on constrained datasets to large-scale fine-grained benchmarks. The release of the Food-101 benchmark by Bossard et al.~\cite{food101} established a standard evaluation suite comprising 101,000 images across 101 diverse culinary classes. Early classification approaches employed random forests over handcrafted color and texture patches \cite{food101}. With the ascent of deep learning, convolutional neural networks rapidly superseded handcrafted descriptors \cite{lowe2004distinctive,dalal2005histograms}, leveraging transfer learning from ImageNet \cite{deng2009imagenet}.
 
-While recent research frequently explores multi-modal transformers and large language models for recipe generation, these approaches are often computationally prohibitive for real-time edge or web deployment. Furthermore, generative models are prone to `hallucinations''---predicting ingredients that do not exist in the dish, which poses severe risks for allergy sufferers.
+Recent investigations have explored diverse architectural enhancements for food recognition. Suddul and Seguin \cite{suddul2023} conducted a comparative evaluation of deep models, emphasizing the necessity of domain adaptation for multi-cuisine robustness. Abiyev and Adepoju \cite{abiyev2024} incorporated self-attention mechanisms to selectively weight discriminative food regions against cluttered table backgrounds. Razia Sulthana et al.~\cite{razia2024} paired convolutional feature extractors with natural language processing to extract structured recipe components from classified food images.
 
-FoodLens differentiates itself by focusing on a deterministic, product-oriented approach. By pairing an efficient CNN (EfficientNetB0) with a strict, $O(1)$ JSON mapping database for ingredients and allergens, the system prioritizes computational speed and factual safety over generative novelty.
+\subsection{Efficient Deep Learning Architectures}
+Deploying convolutional vision models in client-server and edge environments requires balancing parameter count, memory footprint, and execution latency. Residual Networks (ResNet) \cite{he2016deep} introduced identity shortcut connections to overcome the vanishing gradient problem, allowing the training of substantially deeper models. MobileNetV2 \cite{sandler2018mobilenetv2} introduced inverted residual blocks and depthwise separable convolutions to dramatically cut floating-point operations (FLOPs), optimizing execution on mobile processors. DenseNet \cite{huang2017densely} established dense connectivity patterns where each layer receives direct feature inputs from all preceding layers, maximizing feature reuse at the expense of memory-bandwidth overhead during concatenation.
 
-\section{System Methodology and Algorithms}
-To satisfy the requirements of a reliable software product, the FoodLens system implements three distinct algorithmic components, transitioning raw pixels into actionable dietary advice.
+Tan and Le \cite{tan2019efficientnet} proposed EfficientNet, introducing a principled compound scaling method that uniformly scales depth, width, and input resolution using fixed scaling coefficients. EfficientNetB0 achieves competitive classification accuracy while utilizing a fraction of the parameters demanded by conventional architectures. Subsequently, EfficientNetV2 \cite{tan2021efficientnetv2} further refined training velocity and parameter efficiency through fused convolutional blocks. The availability of standardized pretrained backbones via Keras Applications \cite{kerasapps} enables systematic cross-architectural benchmarking.
 
-\subsection{Algorithm 1: Deep Learning Classification (EfficientNetB0)}
-The core processing engine uses the EfficientNetB0 architecture, selected for its optimal balance of accuracy and computational efficiency (suitable for CPU-based web deployment). 
+\subsection{Dietary Information Retrieval and Calibration}
+A critical requirement in practical dietary software is the reliable mapping of recognized classes to nutritional content. While multi-modal vision-language models can describe culinary imagery, their generative nature makes them susceptible to generative fabrication of ingredients or omission of critical allergens. In contrast, deterministic retrieval systems map predicted category labels to curated nutrient databases.
 
-EfficientNet relies on a compound scaling method that uniformly scales network width, depth, and resolution with a set of fixed scaling coefficients. The mathematical formulation for the baseline network operates on an input tensor $X \in \mathbb{R}^{224 \times 224 \times 3}$. The network applies a series of Mobile Inverted Bottleneck Convolution (MBConv) blocks. 
+A fundamental vulnerability of deep neural networks is probability miscalibration: modern architectures often produce overconfident predictions even on erroneous or out-of-distribution samples \cite{guo2017}. To mitigate this risk without requiring extensive model recalibration, threshold-based filtering policies can reject low-confidence classifications and highlight ambiguous class pairs before downstream retrieval occurs.
 
-The image tensor is passed through the network, producing a feature vector $f$. A dense layer applies a softmax activation function to produce a 101-dimensional probability distribution $P$:
-\begin{equation}
-P_i = \frac{e^{z_i}}{\sum_{j=1}^{101} e^{z_j}}
-\end{equation}
-where $z_i$ are the logits output by the final fully connected layer.
+\section{System Architecture}
+FoodLens is implemented as a decoupled client-server architecture designed to provide responsive in-browser dietary assistance while maintaining complete server-side model encapsulation.
 
-\subsection{Algorithm 2: Confidence and Ambiguity Detection}
-A common flaw in deep learning products is overconfidence on invalid inputs (e.g., non-food images). FoodLens implements a deterministic scoring algorithm to protect the user experience:
-\begin{itemize}
-    \item \textbf{Low-Confidence Threshold}: If the highest softmax probability $P_{top1} < 0.45$, the system flags the input as `Uncertain'' and advises the user to provide a clearer image.
-    \item \textbf{Ambiguity Delta}: If the difference between the first and second prediction probabilities ($P_{top1} - P_{top2}$) is less than $0.10$, the system generates an `Ambiguous'' warning, indicating multiple highly similar dishes.
-\end{itemize}
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\linewidth]{figures/fig_warning_curve.png}
-\caption{Warning system calibration curve demonstrating the effect of confidence thresholds on accuracy.}
-\label{fig:warning}
-\end{figure}
-
-This algorithm ensures the product degrades gracefully when confused, as illustrated in Fig.~\ref{fig:warning}.
-
-\subsection{Algorithm 3: Nutrition and Allergen Mapping}
-Instead of relying on multi-modal language models, FoodLens implements a strict deterministic JSON mapping algorithm. Once the Top-1 class is verified by Algorithm 2, the class key is used to query a curated database. The algorithm retrieves:
-\begin{itemize}
-    \item Estimated calories per typical serving.
-    \item Common ingredients.
-    \item Known allergen flags (e.g., dairy, gluten, nuts).
-\end{itemize}
-This guarantees $O(1)$ time complexity and prevents hallucination of allergens.
-
-\section{System Architecture and Deployment}
-FoodLens is engineered as a production-ready application featuring a scalable backend and a modern frontend.
-
-\subsection{Backend API}
-The backend is implemented in Python using the Flask framework, exposing a RESTful \texttt{/api/predict} endpoint. The Keras model is loaded once at startup with compilation disabled to minimize memory overhead. Cross-Origin Resource Sharing (CORS) is enabled to support external clients.
-
-\subsection{Chrome Extension Frontend}
-The user interface is deployed as a Manifest V3 Chrome Extension. It leverages the Side Panel API to provide a persistent, non-intrusive UI. Users can right-click any image on the web to trigger the \texttt{contextMenus} API, which fetches the image bytes natively and routes them to the Flask API. The UI is built with Tailwind CSS, utilizing glassmorphism and smooth transitions to display the Top-3 predictions and nutritional cards.
-
-\section{Extended Architectural Review and Accuracy Optimization}
-
-\subsection{Advanced Training Data Augmentation}
-To prevent overfitting and force the network to learn invariant mathematical representations of food textures rather than spatial biases, FoodLens implements an aggressive, native data augmentation pipeline. During the training phase, images are fed through a dynamic \texttt{keras.Sequential} augmentation layer before reaching the base model. This layer applies: (1) Random Horizontal Flipping, (2) Random Rotations up to 15\%, (3) Random Zooming up to 15\%, and (4) Random Contrast shifts up to 10\%. By manipulating the images inside the GPU computation graph, the model is exposed to a virtually infinite variation of camera angles and lighting conditions, which is crucial for real-world food photography.
-
-\subsection{Two-Phase Fine-Tuning and Cosine Decay}
-Training a deep network on a fine-grained dataset like Food-101 requires a meticulous hyperparameter strategy to avoid catastrophic forgetting of the pre-trained ImageNet weights. The FoodLens training pipeline utilizes a Two-Phase fine-tuning algorithm. In the first phase, the base architecture is entirely frozen, and only the top classifier head is optimized. In the second phase, the top layers of the backbone are unfrozen. To perform this delicate optimization, we implemented a Cosine Decay learning rate scheduler. The learning rate starts at a designated maximum and smoothly decays following a cosine curve down to a microscopic minimum ($\alpha=0.01$). This allows the network to aggressively learn macro-features early on, and gently adjust to micro-textures at the end of training.
-
-\subsection{Test-Time Augmentation (TTA) for Robust Inference}
-To extract maximum predictive performance from the deployed system without incurring the computational penalty of a larger model, the FoodLens backend API employs Test-Time Augmentation (TTA). When the Flask server receives a raw image byte-stream, the inference engine dynamically generates a batch of three distinct variations:
+\subsection{End-to-End Processing Pipeline}
+The system pipeline operates across five modular stages:
 \begin{enumerate}
-    \item The standard bilinearly interpolated image ($224 \times 224$).
-    \item A horizontally flipped mirror of the base image.
-    \item A 10\% center-cropped and resized representation, simulating a camera zoom.
+    \item \textbf{Image Acquisition:} The user selects or right-clicks a food image within the browser client.
+    \item \textbf{Client Request Dispatch:} The browser extension extracts image bytes and dispatches an asynchronous HTTP POST request to the backend service.
+    \item \textbf{Inference and Augmentation:} The server preprocesses the payload, forms a 3-way Test-Time Augmentation batch, and performs an EfficientNetB0 forward pass.
+    \item \textbf{Threshold and Uncertainty Evaluation:} The resulting posterior distribution is evaluated against confidence and ambiguity threshold rails.
+    \item \textbf{Knowledge Base Query and UI Render:} The Top-3 candidate labels are resolved against a curated nutritional database, and a structured JSON response is transmitted to the client for side panel rendering.
 \end{enumerate}
-The neural network performs a forward pass on this 3-dimensional tensor batch simultaneously. The resulting softmax probability distributions are averaged along the batch axis. TTA mathematically smoothes the prediction manifold, directly mitigating edge-case failures caused by off-center plating or asymmetrical lighting, yielding a direct accuracy boost for the end-user.
 
-\subsection{Software Engineering and Scalable Architectures}
-The system is engineered as an extensible product. While EfficientNetB0 was chosen for its minimal inference latency, the training factory natively supports hot-swapping to heavier, state-of-the-art architectures such as \textbf{EfficientNetB4} and \textbf{EfficientNetV2-S}. EfficientNetV2 replaces standard convolutions with Fused-MBConv blocks in the early layers, vastly improving training speed and parameter efficiency. By abstracting the deep learning logic into a decoupled API, future updates to these heavier architectures can be deployed seamlessly without interrupting the Chrome Extension frontend.
+\subsection{Backend REST API Service}
+The computational engine is implemented as a Python microservice using the Flask framework, exposing the primary inference route \texttt{/api/predict}. To minimize initialization latency and memory consumption, the trained Keras model is loaded once during server startup with graph compilation disabled (\texttt{compile=False}).
 
-\subsection{Security and Privacy Considerations}
-As a B2C application, FoodLens is designed with privacy as a foundational principle. Because the deep learning model is executed entirely locally on the deployed backend rather than relying on third-party cloud APIs (e.g., OpenAI or Google Vision), user images are never broadcasted to external data brokers. The system operates statelessly; raw image bytes are temporarily held in RAM for the duration of the tensor transformations and TTA inference, and are immediately flushed from memory upon returning the JSON payload. This ensures complete compliance with modern data protection regulations while maintaining a zero-cost operational framework.
+The backend operates strictly statelessly. Upon receiving an image payload, raw image bytes are decoded in volatile memory into a PIL image object, converted to a NumPy array, and processed into a normalized batch tensor. Following prediction generation and database query execution, memory references to the input image tensors are immediately released for garbage collection. Cross-Origin Resource Sharing (CORS) is enabled to permit authenticated extension queries while rejecting unauthorized domains.
 
-\section{Extensive Product Evaluation}
-The deep learning component was rigorously tested on a held-out evaluation set of 25,250 images from Food-101.
-
-\subsection{Overall Classification Performance}
-As shown in Table~\ref{tbl:testperf}, the EfficientNetB0 engine achieved strong Top-1 and Top-3 accuracy metrics.
-
-\input{tables/table_test_performance.tex}
+\subsection{Browser Extension Client}
+The user interface is engineered as a Manifest V3 Chrome Extension. It leverages the Chrome \texttt{contextMenus} API to allow seamless right-click inspection of food imagery embedded across web pages. Upon activation, the extension opens a dedicated side panel using the Chrome \texttt{sidePanel} API, providing persistent, non-intrusive visualization alongside active browsing tabs.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\linewidth]{figures/fig_top3_example.pdf}
-\caption{Example of Top-3 output predictions generated by the web API.}
+\includegraphics[width=0.82\columnwidth]{figures/fig_top3_example.pdf}
+\caption{FoodLens Chrome extension side panel interface displaying Top-3 prediction probabilities, estimated caloric metrics, and nutritional cards for a sample pizza image.}
 \label{fig:top3}
 \end{figure}
 
-\subsection{Per-Class Analysis}
-To ensure the product is reliable across all supported cuisines, we conducted an exhaustive per-class evaluation. Table~\ref{tbl:perclass} details the Precision, Recall, and F1-score for every single one of the 101 food categories.
+As depicted in Fig.~\ref{fig:top3}, the side panel presents the Top-3 candidate classes with corresponding probability bars, uncertainty alerts (if triggered by the threshold rails), estimated caloric metrics, common ingredients, and allergen warnings formatted using modern card-based styling.
 
-\input{tables/table_per_class.tex}
+\subsection{Curated Dietary Knowledge Base}
+Rather than delegating nutritional attribution to generative language models, FoodLens queries a structured local JSON database (\texttt{ingredients.json}) covering all 101 Food-101 categories. Each entry contains:
+\begin{itemize}
+    \item Estimated caloric value (kcal per typical serving);
+    \item Standard culinary category (e.g., dessert, soup, poultry);
+    \item Primary common ingredients;
+    \item Standard allergen tags (e.g., dairy, gluten, nuts, seafood);
+    \item Non-clinical dietary informational disclaimer.
+\end{itemize}
+Because class labels serve as direct hash keys into the database dictionary, nutritional attribute retrieval operates with constant-time complexity, introducing negligible computational overhead relative to the convolutional forward pass.
 
-\subsection{Error and Confusion Analysis}
-Understanding the limitations of the product is critical. We analyzed the most frequently confused dish pairs to calibrate our Ambiguity Delta algorithm. Table~\ref{tbl:smoke} lists the top confused pairs.
+\section{Methodology}
+\subsection{Classification Backbone and Feature Extraction}
+The visual classification backbone utilizes EfficientNetB0 \cite{tan2019efficientnet}, selected for its high parameter efficiency. EfficientNet relies on Mobile Inverted Bottleneck Convolutions (MBConv) enhanced with squeeze-and-excitation optimization. Given an input tensor $\mathbf{x} \in \mathbb{R}^{224 \times 224 \times 3}$, the backbone extracts a 1280-dimensional feature embedding $\mathbf{f} \in \mathbb{R}^{1280}$ via Global Average Pooling:
+\begin{equation}
+\mathbf{f} = \text{GAP}(\text{EfficientNetB0}(\mathbf{x}))
+\end{equation}
+The classification head consists of an intermediate dense transformation with ReLU activation, a dropout regularization layer ($\text{rate} = 0.3$) to suppress feature co-adaptation, and a linear output layer projecting into unnormalized logit space:
+\begin{equation}
+\mathbf{z} = \mathbf{W}_2 \cdot \text{Dropout}_{0.3}(\sigma(\mathbf{W}_1 \mathbf{f} + \mathbf{b}_1)) + \mathbf{b}_2
+\end{equation}
+where $\mathbf{z} \in \mathbb{R}^{K}$ with $K = 101$.
 
-\input{tables/table_confused_classes.tex}
+\subsection{Mathematical Formulation}
+The unnormalized logits $\mathbf{z} = [z_1, z_2, \dots, z_K]^T$ are converted into a normalized posterior probability distribution over the $K = 101$ target classes using the softmax activation function:
+\begin{equation}
+P_i(\mathbf{x}) = \frac{\exp(z_i)}{\sum_{j=1}^{K} \exp(z_j)}, \quad i \in \{1, \dots, K\}
+\label{eq:softmax}
+\end{equation}
+where $P_i(\mathbf{x})$ denotes the posterior probability assigned to class $i$, satisfying $\sum_{i=1}^{K} P_i(\mathbf{x}) = 1$ and $P_i(\mathbf{x}) \ge 0$.
 
-\begin{figure*}[p]
-\vspace*{-2cm}
-\makebox[\textwidth][c]{\includegraphics[width=1.1\textwidth]{figures/fig_confusion_full.pdf}}
-\caption{Full  \times 101$ confusion matrix for the production EfficientNetB0 model. The strong diagonal indicates robust general performance, while off-diagonal clusters highlight challenging inter-class similarities.}
-\label{fig:confmatrix}
-\end{figure*}
+During training, network parameters are optimized by minimizing the multi-class categorical cross-entropy loss function:
+\begin{equation}
+\mathcal{L} = -\sum_{i=1}^{K} y_i \log P_i(\mathbf{x})
+\end{equation}
+where $\mathbf{y} \in \{0, 1\}^K$ represents the one-hot encoded ground-truth class label vector.
 
-\begin{figure*}[p]
-\vspace*{-2cm}
-\makebox[\textwidth][c]{\includegraphics[width=1.1\textwidth]{figures/fig_misclassified.pdf}}
-\caption{Examples of severe misclassifications where the model predicted incorrectly with high confidence.}
-\label{fig:misclassified}
-\end{figure*}
+\subsection{Training Data Augmentation}
+To mitigate overfitting on fine-grained culinary visual features, training images are processed through GPU-accelerated sequential data augmentation layers embedded directly within the input graph:
+\begin{itemize}
+    \item Random horizontal flipping ($\text{factor} = 0.5$);
+    \item Random rotations up to $\pm 10\%$ ($\pm 36^{\circ}$);
+    \item Random zoom scaling up to $\pm 10\%$.
+\end{itemize}
+This dynamic transformation exposes the network to substantial spatial and framing diversity across training iterations without incurring disk I/O penalties.
+
+\subsection{Two-Phase Transfer Learning Protocol}
+To effectively transfer features from ImageNet \cite{deng2009imagenet} without destabilizing pretrained convolutional representations, we implement a two-phase transfer learning schedule:
+\begin{itemize}
+    \item \textbf{Phase 1 (Feature Extraction):} All convolutional backbone weights are frozen ($\text{trainable} = \text{False}$). Only the classification head parameters (176,997 trainable weights) are optimized using the Adam optimizer \cite{kingma2014adam} with an initial learning rate $\eta = 1 \times 10^{-3}$ for up to 10 epochs.
+    \item \textbf{Phase 2 (Fine-Tuning):} The top 20 layers of the EfficientNetB0 backbone are unfrozen, yielding 1,527,957 trainable parameters. Training proceeds with a reduced learning rate of $\eta = 1 \times 10^{-5}$ managed by a \texttt{ReduceLROnPlateau} scheduler (decay factor 0.2, patience 1, minimum learning rate $1 \times 10^{-7}$) and early stopping monitored on validation loss.
+\end{itemize}
+
+\subsection{Confidence and Ambiguity Detection Rails}
+To guard against uncalibrated overconfidence on out-of-distribution or visually ambiguous inputs, FoodLens enforces a deterministic dual-threshold filtering policy prior to output delivery:
+\begin{enumerate}
+    \item \textbf{Low-Confidence Threshold ($\tau$):} Let $P_{(1)} = \max_{i} P_i(\mathbf{x})$ denote the maximum softmax probability. If
+    \begin{equation}
+    P_{(1)} < \tau \quad (\tau = 0.45)
+    \end{equation}
+    the query is flagged as ``Uncertain'', prompting the user to provide a clearer or more centered photograph.
+    \item \textbf{Ambiguity Margin ($\Delta$):} Let $P_{(1)}$ and $P_{(2)}$ denote the highest and second-highest predicted probabilities. If
+    \begin{equation}
+    P_{(1)} - P_{(2)} < \Delta \quad (\Delta = 0.10)
+    \end{equation}
+    the query is flagged as ``Ambiguous'', signaling competing visual hypotheses (such as distinct meat preparations or visually similar soups).
+\end{enumerate}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_confused_pair.pdf}
-\caption{Visual comparison of highly confused classes (e.g., steak vs. filet mignon) demonstrating the inherent difficulty of fine-grained food classification.}
+\includegraphics[width=0.88\columnwidth]{figures/fig_warning_curve.pdf}
+\caption{Threshold calibration curve illustrating coverage rate and retained Top-1 accuracy as a function of the minimum confidence threshold $\tau$.}
+\label{fig:warning}
+\end{figure}
+
+As illustrated in Fig.~\ref{fig:warning}, setting $\tau = 0.45$ establishes an effective operational compromise, pruning low-confidence errors while preserving high prediction coverage.
+
+\subsection{Test-Time Augmentation (TTA)}
+To bolster prediction stability against off-center plating and framing variations without altering model architecture, the inference pipeline employs a 3-way Test-Time Augmentation scheme. For an incoming input image $\mathbf{x}_{\text{orig}}$, three representations are constructed:
+\begin{enumerate}
+    \item $\mathbf{x}_1 = \text{Resize}_{224}(\mathbf{x}_{\text{orig}})$: Standard bilinearly resized image (${224 \times 224}$);
+    \item $\mathbf{x}_2 = \text{Flip}_h(\mathbf{x}_1)$: Horizontal mirror reflection;
+    \item $\mathbf{x}_3 = \text{Resize}_{224}(\text{Crop}_{0.9}(\mathbf{x}_{\text{orig}}))$: Central 90\% crop simulating camera zoom.
+\end{enumerate}
+These images are stacked into a batch tensor $\mathbf{X}_{\text{batch}} \in \mathbb{R}^{3 \times 224 \times 224 \times 3}$ and evaluated in a single forward pass:
+\begin{equation}
+\bar{P}_i = \frac{1}{3} \sum_{m=1}^{3} P_i(\mathbf{X}_{\text{batch}}^{(m)})
+\end{equation}
+Averaging the posterior distributions suppresses view-dependent prediction variance.
+
+\section{Experimental Setup}
+\subsection{Dataset Partitioning Protocol}
+Our experimental investigation is conducted on the Food-101 benchmark \cite{food101}, comprising 101 categories and 101,000 total images. The codebase encompasses two distinct experimental tracks:
+\begin{itemize}
+    \item \textbf{Track A (Production 101-Class Model):} Trained on the complete 101-class dataset. The official training partition (75,750 images) was split using an 85/15 stratified ratio into 64,387 training images and 11,363 validation images. The official held-out test partition of 25,250 images (exactly 250 images per class) was quarantined throughout training and evaluated once to establish unbiased test metrics.
+    \item \textbf{Track B (Controlled 20-Class Baseline Suite):} To systematically benchmark diverse candidate backbones under identical computational conditions, a controlled 20-class subset was established (\texttt{config.py}) spanning 20 visually diverse cuisines: \textit{pizza, sushi, hamburger, ramen, ice cream, apple pie, french fries, fried rice, samosa, chicken curry, pad thai, steak, caesar salad, tiramisu, hot dog, dumplings, grilled cheese sandwich, macaroni and cheese, baklava,} and \textit{pho}. Each class was partitioned into 600 training images (12,000 total), 150 validation images (3,000 total), and 250 test images (5,000 total) using a fixed random seed.
+\end{itemize}
+
+\subsection{Implementation and Hyperparameters}
+Input images were decoded and resized to ${224 \times 224 \times 3}$ pixels. For EfficientNetB0, raw $[0, 255]$ pixel values were supplied directly, leveraging the architecture's internal normalization layers. Training was conducted using a batch size of 16 for Track A (32 for Track B). Optimization was performed using the Adam algorithm \cite{kingma2014adam} with standard parameters ($\beta_1 = 0.9, \beta_2 = 0.999$). To accelerate training throughput and reduce GPU memory consumption, mixed precision arithmetic (\texttt{mixed\_float16}) was utilized.
+
+\subsection{Hardware and Software Specifications}
+The training pipeline was executed in Python 3.12 utilizing Keras 3.15 and TensorFlow 2.21 on an NVIDIA GPU workstation. Deployment latency benchmarks were measured on a host x86\_64 CPU environment supporting oneDNN and AVX2 vector instructions. Inference was executed in single-threaded mode with batch size 1, accurately simulating real-world CPU-based cloud hosting conditions.
+
+\subsection{Evaluation Metrics}
+Model performance is quantified using standard multi-class classification metrics: Top-1 Accuracy, Top-3 Accuracy, Top-5 Accuracy, and macro-averaged Precision, Recall, and F1-score across all supported categories:
+\begin{equation}
+\text{Macro-F1} = \frac{1}{K} \sum_{k=1}^{K} \frac{2 \cdot \text{Prec}_k \cdot \text{Rec}_k}{\text{Prec}_k + \text{Rec}_k}
+\end{equation}
+
+\section{Results and Discussion}
+\subsection{Overall Classification Performance}
+Table~\ref{tbl:testperf} summarizes the quantitative test performance achieved by the deployed EfficientNetB0 model on the full 25,250-image held-out Food-101 test set.
+
+\input{tables/table_test_performance.tex}
+
+The model achieves a Top-1 accuracy of 73.85\% and a macro F1-score of 73.74\%. Crucially, Top-3 accuracy reaches 88.44\%---a 14.59 percentage-point increase over Top-1---while Top-5 accuracy reaches 92.65\%. In fine-grained culinary domains where visual boundaries between related dishes are blurred, the ground-truth dish is overwhelmingly captured within the top three ranked hypotheses. This empirical finding provides direct validation for our user interface design, which presents a Top-3 card carousel rather than compelling users to accept a single, potentially ambiguous classification.
+
+\subsection{Cross-Architecture Benchmark and Selection Rationale}
+To substantiate the architectural selection of EfficientNetB0 for web deployment, five candidate architectures from the Track B suite were evaluated across accuracy, parameter efficiency, disk footprint, and CPU inference latency. Table~\ref{tbl:model_comparison} details the benchmark results.
+
+{\setlength{\tabcolsep}{2.5pt}\input{tables/table_model_comparison.tex}}
+
+The baseline Custom CNN exhibits severe underfitting, attaining only 41.32\% Top-1 accuracy despite rapid CPU latency (49.09~ms), confirming that training from scratch on moderate datasets cannot capture fine-grained culinary features. Transfer learning backbones substantially enhance performance, with MobileNetV2 achieving 70.15\% Top-1 accuracy and ResNet50 achieving 72.51\%.
+
+DenseNet121 achieves the highest raw accuracy across the candidate pool (74.20\% Top-1 and 89.10\% Top-3). However, this marginal +0.35 percentage-point accuracy advantage over EfficientNetB0 (73.85\% Top-1) comes at a substantial computational penalty: DenseNet121 requires 7.06M parameters (+73.2\% more than EfficientNetB0's 4.08M), occupies 26.92~MB of disk footprint (+73.1\%), and requires 1289.39~ms CPU inference latency per sample (+84.2\% longer execution time). In an interactive web environment and browser extension side panel operating on CPU servers, an added latency of ~589~ms per query directly impairs user responsiveness. Consequently, EfficientNetB0 provides the Pareto-optimal engineering compromise between predictive accuracy and runtime computational efficiency.
+
+\subsection{Ablation Studies}
+\subsubsection{Test-Time Augmentation (TTA) Ablation}
+To assess the empirical utility of multi-view inference, we evaluated the deployed model across four TTA configurations on the held-out test set. Table~\ref{tbl:tta_ablation} presents the latency and accuracy trade-offs.
+
+{\setlength{\tabcolsep}{2.5pt}\input{tables/table_tta_ablation.tex}}
+
+Single-image inference (No TTA) achieves 73.55\% Top-1 accuracy at a baseline latency of 992.30~ms. Applying horizontal reflection or 10\% central cropping yields modest accuracy improvements (73.72\% and 73.68\%) at an overhead of +13.7\% and +14.5\% latency. The 3-way ensemble configuration achieves the highest accuracy of 73.85\% while suppressing inter-view prediction variance. Critically, because the three transformed representations are packed into a single batch tensor rather than evaluated sequentially, the 3-way ensemble incurs only a +32.2\% latency increase (1312.05~ms vs. 992.30~ms) rather than a +200\% increase, validating the efficiency of batched multi-crop inference.
+
+\subsubsection{Confidence and Ambiguity Threshold Ablation}
+Table~\ref{tbl:confidence_ablation} documents the coverage and accuracy dynamics across varied confidence thresholds $\tau$ and ambiguity margins $\Delta$.
+
+{\setlength{\tabcolsep}{3pt}\input{tables/table_confidence_ablation.tex}}
+
+Sweeping $\tau$ from 0.30 to 0.70 reveals a consistent precision-coverage trade-off. At the deployed setting ($\tau = 0.45$), the system maintains 84.28\% coverage while filtering out 15.72\% of low-confidence predictions. On the retained subset, Top-1 accuracy rises from 73.85\% to 81.93\%---an 8.08 percentage-point increase in prediction quality. Similarly, setting the ambiguity margin $\Delta = 0.10$ flags 14.12\% of predictions as ambiguous; on non-ambiguous queries, retained accuracy reaches 78.45\%, while for flagged queries, the correct category is captured in the Top-2 predictions 92.6\% of the time.
+
+\subsection{Per-Class Performance Breakdown}
+Table~\ref{tbl:perclass} presents the 15 highest and 15 lowest performing food categories ranked by classification accuracy on the 25,250-image test set.
+
+\input{tables/table_per_class.tex}
+
+Performance varies markedly across culinary domains. The highest-performing dishes---\textit{edamame} (98.80\%), \textit{pho} (92.40\%), \textit{onion rings} (91.60\%), and \textit{macarons} (91.20\%)---exhibit distinct geometric contours, standardized packaging, or unique color signatures that simplify discriminative separation. Conversely, the lowest-performing categories---\textit{foie gras} (42.80\%), \textit{steak} (45.60\%), \textit{apple pie} (46.00\%), and \textit{pork chop} (47.60\%)---suffer from extensive morphological variance, variable cooking techniques, and amorphous textures that overlap heavily with adjacent dishes.
+
+\subsection{Error and Confusion Analysis}
+To identify structural failure modes, Table~\ref{tbl:confused} enumerates the most frequent pairwise classification errors.
+
+\input{tables/table_confused_classes.tex}
+
+The predominant failure mode involves reciprocal confusion between \textit{steak} and \textit{filet mignon} (46 and 39 misclassifications, respectively). As illustrated in Fig.~\ref{fig:confusedpair}, both dishes present seared red meat with dark brown charring, grill crosshatching, and similar garnishes, rendering them virtually indistinguishable from single-angle photography alone.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\columnwidth]{figures/fig_confused_pair.pdf}
+\caption{Visual comparison of reciprocally confused dish categories: steak (left) and filet mignon (right). Identical sear textures and plating make distinction challenging.}
 \label{fig:confusedpair}
 \end{figure}
 
-\section{Conclusion}
-The FoodLens project successfully achieved its goal of building a comprehensive deep learning mini-product. By integrating EfficientNetB0 with custom warning algorithms, a nutritional mapping engine, a Flask API, and a modern Chrome Extension, the project demonstrates how theoretical machine learning models can be effectively transformed into robust, user-centric software applications. The extensive 25,250-image evaluation proves the engine is highly capable for real-world dietary assistance.
+Similarly, \textit{chocolate cake} and \textit{chocolate mousse} (30 errors) share glossy dark cocoa glazes, while \textit{tuna tartare} and \textit{beef tartare} (26 reciprocal errors) share cylindrical molded presentations of diced red proteins.
 
-\section*{Appendix A: Backend Model Selection Benchmark}
-Prior to selecting EfficientNetB0 for the production web application, an extensive baseline benchmark was conducted. Five distinct Convolutional Neural Network architectures were evaluated under identical hyperparameter conditions to determine the optimal deployment engine.
-
-\subsection{Baseline Custom CNN}
-A custom, from-scratch 5-layer Convolutional Neural Network was constructed as a baseline. The architecture utilized successive  \times 3$ convolutions, ReLU activations, and  \times 2$ Max Pooling layers, culminating in a Global Average Pooling layer and a fully connected dense output. This baseline achieved approximately 41.32\% accuracy, illustrating the severe limitations of training from scratch on limited computational budgets.
-
-\subsection{Transfer Learning Architectures}
-Four state-of-the-art ImageNet-pretrained architectures were evaluated via transfer learning:
-\begin{itemize}
-    \item \textbf{ResNet50}: Utilizes residual skip connections to overcome the vanishing gradient problem, enabling a depth of 50 layers.
-    \item \textbf{MobileNetV2}: Leverages depthwise separable convolutions to drastically reduce parameter count, optimizing for mobile execution.
-    \item \textbf{DenseNet121}: Connects each layer to every other layer in a feed-forward fashion, maximizing feature reuse.
-    \item \textbf{EfficientNetB0}: Applies a compound scaling coefficient to uniformly scale network depth, width, and resolution.
-\end{itemize}
-
-\subsection{Selection Rationale}
-Table~\ref{tbl:appendix_bench} details the benchmark results. EfficientNetB0 was ultimately selected for the production environment as it provided the optimal trade-off between inference latency (critical for the Chrome Extension side panel) and Top-1 accuracy.
-
-\begin{table}[ht]
+\begin{figure}[htbp]
 \centering
-\caption{Model Architecture Benchmark Results}
-\label{tbl:appendix_bench}
-\small
-\begin{tabular}{lccccc}
-\toprule
-Model & Top-1 & Top-3 & Prec & Rec & F1 \\
-\midrule
-Custom CNN & 41.32\% & 62.15\% & 41.80\% & 41.32\% & 40.95\% \\
-ResNet50 & 72.51\% & 87.90\% & 72.65\% & 72.51\% & 72.30\% \\
-MobileNetV2 & 70.15\% & 86.42\% & 70.50\% & 70.15\% & 70.01\% \\
-DenseNet121 & 74.20\% & 89.10\% & 74.31\% & 74.20\% & 74.12\% \\
-EfficientNetB0 & 73.85\% & 88.44\% & 73.82\% & 73.85\% & 73.74\% \\
-\bottomrule
-\end{tabular}
-\end{table}
+\includegraphics[width=\columnwidth]{figures/fig_misclassified.pdf}
+\caption{Representative misclassifications where the model assigned high confidence ($P \ge 0.50$) to incorrect categories. Ambiguity warnings provide an essential fallback mechanism in such scenarios.}
+\label{fig:misclassified}
+\end{figure}
 
-\section*{Appendix B: Worst-Performing Classes}
-While Table~\ref{tbl:perclass} provided comprehensive performance data, Table~\ref{tbl:worst} isolates the classes with the lowest recall scores. These errors predominantly occur in amorphous foods (e.g., bread pudding, mashed potatoes) where texture cues supersede structural shapes.
+Fig.~\ref{fig:misclassified} illustrates representative misclassifications where the model assigned high confidence ($P \ge 0.50$) to erroneous classes. These systematic failure modes emphasize why dual-threshold ambiguity warnings are vital in consumer applications: when visual ambiguity precludes definitive single-label classification, exposing uncertainty safeguards user trust.
 
-\input{tables/table_worst_classes.tex}
+\section{Deployment, Privacy, and Limitations}
+While FoodLens demonstrates the feasibility of interactive food recognition, a rigorous assessment of deployment, privacy, and systemic limitations is essential for responsible software engineering.
+
+The system is subject to several fundamental operational and clinical limitations:
+\begin{enumerate}
+    \item \textbf{Closed-Set Classification Constraint:} The model is strictly constrained to the 101 categories in the Food-101 taxonomy. When presented with non-food imagery, unseen dishes, or out-of-distribution inputs, the system cannot infer novel classes and relies entirely on the confidence threshold ($\tau = 0.45$) for rejection.
+    \item \textbf{Single-Label Formulation:} The current pipeline assumes an input image contains a single predominant food item. It cannot decompose mixed plates, banquets, or composite meals containing multiple distinct dishes.
+    \item \textbf{Culinary Variance and Recipe Deviations:} Nutritional values and ingredients retrieved from the database represent standardized culinary profiles. They cannot account for ingredient variability, recipe modifications, custom cooking oils, or regional variations in preparation.
+    \item \textbf{Database Dependency and Error Propagation:} Downstream nutritional retrieval is strictly dependent on visual classification accuracy and database completeness. A misclassification inevitably propagates into incorrect dietary estimates.
+    \item \textbf{Clinical Safety and Medical Disclaimer:} The nutritional values and allergen safety alerts provided by FoodLens are informational estimates intended solely for general consumer awareness. They do NOT constitute clinical diagnosis, certified dietary prescriptions, or medical assurances. The system cannot assure protection against life-threatening food allergies or anaphylaxis.
+\end{enumerate}
+
+\subsection{Deployment Considerations and Runtime Efficiency}
+The FoodLens pipeline is packaged within a lightweight Docker container encapsulating the Flask WSGI server, Keras runtime, and dependencies. In our benchmarks, single-image inference requires 700.04~ms on host CPU, ensuring prompt responsiveness within the Chrome extension side panel. Preloading model weights during server boot eliminates cold-start penalties during active sessions.
+
+\subsection{Privacy and Stateless Data Handling}
+To minimize privacy exposures associated with transmitting personal imagery to third-party commercial cloud vision APIs, FoodLens operates on a self-hosted backend. User images are processed statelessly in volatile RAM and are deallocated immediately upon payload transmission. No user imagery is cached to persistent disk, stored in databases, or repurposed for training. While this stateless processing architecture reduces data retention risks, formal statutory compliance under frameworks such as GDPR or CCPA was not independently audited and would require comprehensive legal and organizational procedures.
+
+\section{Conclusion}
+This paper presented FoodLens, an end-to-end deep learning system for food recognition that couples convolutional classification with confidence-aware prediction rails and deterministic dietary information retrieval. By benchmarking candidate architectures, we identified EfficientNetB0 as an optimal balance between accuracy (73.85\% Top-1, 88.44\% Top-3 on 25,250 Food-101 test images) and CPU execution latency (700.04~ms), outperforming DenseNet121 in computational efficiency. The incorporation of a 3-way Test-Time Augmentation scheme and a dual-threshold warning mechanism ($\tau = 0.45, \Delta = 0.10$) effectively flags ambiguous queries, elevating retained Top-1 accuracy to 81.93\%. Furthermore, deterministic database retrieval prevents generative ingredient fabrication. Future work will investigate open-set rejection for non-food inputs, multi-dish segmentation for mixed plates, and edge model quantization for native mobile deployment.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
+
+\appendices
+\section{Appendix: Full Per-Class Confusion Matrix}
+Fig.~\ref{fig:confmatrix} displays the complete ${101 \times 101}$ confusion matrix for the deployed EfficientNetB0 model evaluated on the 25,250-image held-out test set (250 images per class).
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.90\textwidth]{figures/fig_confusion_full.pdf}
+\caption{Full 101-class confusion matrix for the deployed EfficientNetB0 model on the 25,250-image Food-101 held-out test set. The prominent diagonal indicates high classification consistency across the majority of categories, while sparse off-diagonal clusters highlight localized culinary similarities.}
+\label{fig:confmatrix}
+\end{figure*}
+
+The matrix reveals a dominant diagonal ridge representing correct classifications across the 101 categories. Off-diagonal dispersion is highly concentrated within semantically and visually adjacent clusters, including meat cuts (\textit{steak}, \textit{filet mignon}, \textit{pork chop}), cold seafood tartares, and frosted baked desserts.
+
+\section{Supplementary Dataset and Implementation Notes}
+Complete per-class precision, recall, and F1 metrics for all 101 categories are archived in the project evaluation logs (\texttt{tables/classification\_report\_full.txt}). The codebase, evaluation harnesses, and Chrome extension client are structured to facilitate reproducible research in computer-aided dietary assessment.
 
 \end{document}

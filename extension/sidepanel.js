@@ -157,3 +157,4 @@ function renderResults(res) {
     altPredictions.appendChild(div);
   });
 }
+

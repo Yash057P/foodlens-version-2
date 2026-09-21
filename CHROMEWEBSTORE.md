@@ -43,3 +43,4 @@ FoodLens AI features a beautiful, non-intrusive side panel that stays out of you
 
 ## Version History
 - **1.0.0 (2026-09-21)**: Initial release. Added side panel UI, drag-and-drop upload, right-click context menu integration, and integration with the FoodLens backend API for Top-3 predictions and nutrition retrieval.
+
