@@ -681,6 +681,17 @@ newly labelled images, supervised multi-label ingredient prediction,
 food/non-food rejection training, and mobile deployment. Each extension
 requires separate data preparation and evaluation.
 
+\section*{Appendix}
+\label{sec:appendix}
+Per-class held-out test values of the deployed EfficientNetB0 model
+(accuracy, precision, recall, F1; support $250$ test images per class) are
+given in Table~\ref{tbl:perclass}, and the worst-performing classes in
+Table~\ref{tbl:worst}. The full $101$-class report is available in
+\texttt{paper/tables/classification\_report\_full.txt}.
+
+\input{tables/table_per_class.tex}
+\input{tables/table_worst_classes.tex}
+
 \section*{Acknowledgment}
 \label{sec:ack}
 The authors thank Dr.~Sushopti Gawade for guidance, and acknowledge that all
