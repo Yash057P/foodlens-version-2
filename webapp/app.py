@@ -8,10 +8,17 @@ Routes:
 """
 import json
 import os
+import sys
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
 
+# Add webapp directory to path for imports
+webapp_dir = Path(__file__).resolve().parent
+if str(webapp_dir) not in sys.path:
+    sys.path.insert(0, str(webapp_dir))
+
+# Import FoodLensModel from the same directory
 from inference import FoodLensModel
 
 app = Flask(
@@ -19,9 +26,14 @@ app = Flask(
     static_folder=str(Path(__file__).resolve().parent / "static"),
     template_folder=str(Path(__file__).resolve().parent / "templates"),
 )
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "foodlens-dev-key-change-in-production")
+app.config["UPLOAD_FOLDER"] = Path(__file__).resolve().parent / "uploads"
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB
 
-# load model once at startup
+# Ensure upload folder exists
+app.config["UPLOAD_FOLDER"].mkdir(parents=True, exist_ok=True)
+
+# Load model once at startup
 lens = FoodLensModel()
 
 @app.after_request
@@ -35,6 +47,16 @@ def add_cors_headers(response):
 
 @app.get("/")
 def index():
+    return send_from_directory(str(app.template_folder), "index.html")
+
+
+@app.get("/about")
+def about():
+    return send_from_directory(str(app.template_folder), "index.html")
+
+
+@app.get("/history")
+def history():
     return send_from_directory(str(app.template_folder), "index.html")
 
 
