@@ -50,7 +50,7 @@ Strategic development plan for FoodLens from 2024 to 2026.
 
 | Metric | Value | Target |
 |--------|-------|--------|
-| Model Accuracy (Top-1) | 85.2% | 90%+ |
+| Model Accuracy (Top-1) | 73.9% | 80%+ first, then 90%+ |
 | Inference Time (CPU) | 450ms | <200ms |
 | Supported Classes | 101 | 500+ |
 | Monthly Active Users | 0 | 10,000+ |
@@ -190,18 +190,22 @@ Strategic development plan for FoodLens from 2024 to 2026.
 ### April 2025
 
 #### Model Upgrade (v2.0)
-- [ ] Architecture improvements
-  - EfficientNetV2 or Vision Transformer
-  - Custom architecture research
-  
-- [ ] Expanded dataset
-  - 500+ food classes
-  - Diverse cultural cuisines
-  - Homemade vs. restaurant variations
-  
-- [ ] Improved accuracy targets
-  - Top-1: 90%+
-  - Top-5: 97%+
+- [ ] Establish a reproducible 101-class training baseline
+  - Use the same class map and preprocessing in training, evaluation, and the app
+  - Report top-1, top-3, top-5, macro-F1, per-class accuracy, and confusion pairs
+
+- [ ] Improve the 101-class model before expanding scope
+  - Compare EfficientNetB0 against EfficientNetV2S at 224px and 300px
+  - Use staged fine-tuning with a low backbone learning rate, label smoothing, and food-safe augmentation
+  - Select the model using validation data; publish the official test result once
+
+- [ ] Expand the dataset after the baseline is stable
+  - Add culturally diverse real-world phone images
+  - Include an out-of-distribution set for non-food and mixed-dish photos
+
+- [ ] Accuracy targets
+  - Top-1: 80%+ next milestone, 90%+ stretch goal
+  - Top-5: 95%+ next milestone
 
 ### May 2025
 

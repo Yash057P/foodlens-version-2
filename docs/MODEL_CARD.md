@@ -52,11 +52,10 @@ FoodLens is a deep learning model designed for food image classification. It ide
 
 | Metric | Value | Dataset | Notes |
 |--------|-------|---------|-------|
-| **Top-1 Accuracy** | 85.2% | Food-101 Test Set | Single prediction accuracy |
-| **Top-5 Accuracy** | 94.7% | Food-101 Test Set | Correct class in top 5 |
-| **Precision (macro)** | 84.8% | Food-101 Test Set | Average per-class precision |
-| **Recall (macro)** | 84.5% | Food-101 Test Set | Average per-class recall |
-| **F1 Score (macro)** | 84.6% | Food-101 Test Set | Harmonic mean |
+| **Top-1 Accuracy** | 73.9% | Food-101 Test Set | Single prediction accuracy |
+| **Top-3 Accuracy** | 88.4% | Food-101 Test Set | Correct class in top 3 |
+| **Top-5 Accuracy** | 92.7% | Food-101 Test Set | Correct class in top 5 |
+| **Macro precision/recall/F1** | Not published | Food-101 Test Set | Recompute from cached predictions before reporting |
 
 ### Per-Class Performance (Top 10)
 
@@ -213,7 +212,7 @@ ImageDataGenerator(
 |-------|--------|---------------|-----------------|-------|
 | Warm-up | 1-5 | 0.001 | 65% | Base layers frozen |
 | Fine-tuning | 6-30 | 0.001 → 0.0005 | 82% | Gradual unfreezing |
-| Refinement | 31-50 | 0.0005 → 0.0001 | 85.2% | All layers trainable |
+| Refinement | 31-50 | 0.0005 → 0.0001 | Not published | All layers trainable; validate against the current 101-class run |
 
 ### Training Environment
 
@@ -272,9 +271,9 @@ Final Prediction = Mean(Base, Flip, Crop)
 
 | Metric | Without TTA | With TTA | Improvement |
 |--------|-------------|----------|-------------|
-| Top-1 Accuracy | 83.1% | 85.2% | +2.1% |
-| Top-5 Accuracy | 92.8% | 94.7% | +1.9% |
-| Avg. Confidence | 0.78 | 0.82 | +5.1% |
+| Top-1 Accuracy | 73.55% | 73.85% | +0.30 percentage points |
+| Top-3 Accuracy | 88.10% | 88.44% | +0.34 percentage points |
+| Avg. Confidence | Not published | Not published | Recompute from cached predictions |
 | Inference Time | 150ms | 450ms | +200% |
 
 **Recommendation:** Enable TTA for production use unless latency is critical.
@@ -422,10 +421,10 @@ Track these metrics in production:
 
 | Version | Date | Changes | Accuracy |
 |---------|------|---------|----------|
-| 1.0.0 | Sep 2024 | Initial release | 85.2% |
+| 1.0.0 | Sep 2024 | Initial release | 73.9% top-1 on Food-101 test set |
 | 0.9.0 | Aug 2024 | Beta with TTA | 84.8% |
 | 0.8.0 | Jul 2024 | Warning system | 83.5% |
-| 0.7.0 | Jun 2024 | Nutrition DB | 83.1% |
+| 0.7.0 | Jun 2024 | Nutrition DB | Not published |
 
 ---
 
