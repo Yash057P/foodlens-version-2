@@ -62,12 +62,25 @@ def build_efficientnet_b0(num_classes: int = 20) -> keras.Model:
     return _transfer(keras.applications.EfficientNetB0, "EfficientNetB0", num_classes)
 
 
+def build_efficientnet_b4(num_classes: int = 20) -> keras.Model:
+    # B4 uses larger input resolution natively, but works with 224x224.
+    # It has roughly 19M parameters vs B0's 5M parameters.
+    return _transfer(keras.applications.EfficientNetB4, "EfficientNetB4", num_classes)
+
+
+def build_efficientnet_v2s(num_classes: int = 20) -> keras.Model:
+    # EfficientNetV2S converges faster and achieves higher top-1 accuracy on fine-grained tasks
+    return _transfer(keras.applications.EfficientNetV2S, "EfficientNetV2S", num_classes)
+
+
 MODEL_BUILDERS = {
     "CustomCNN": build_custom_cnn,
     "ResNet50": build_resnet50,
     "MobileNetV2": build_mobilenet_v2,
     "DenseNet121": build_densenet121,
     "EfficientNetB0": build_efficientnet_b0,
+    "EfficientNetB4": build_efficientnet_b4,
+    "EfficientNetV2S": build_efficientnet_v2s,
 }
 
 

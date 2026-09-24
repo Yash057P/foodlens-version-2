@@ -1,32 +1,15 @@
-# Python
-.venv/
-venv/
+```gitignore
+# Python cache
 __pycache__/
 *.pyc
-*.egg-info/
-.pytest_cache/
+*.pyo
+*.pyd
 
-# Data - too large for git (15.5 GB), must never be uploaded
+# Documentation (if generated)
+docs/_build/
+
+# Local datasets and experiment outputs
 /data/
-/src/../data/
-**/data/raw/
-**/data/extracted/
-**/data/preprocessed/
-
-# Local results / figures
-results/
-*.log
-*.log.err
-*.npz
-
-# Root-level duplicate of model (canonical copy lives in webapp/models)
+/results/
 /best_model.keras
-
-# Smoke-test training artifacts (not needed for deployment)
-/models/
-
-# OS / editor
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
+```
