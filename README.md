@@ -5,7 +5,8 @@ Flask web app (mobile-first UI) and a Docker image.
 
 ## Features
 - Trained **EfficientNetB0** on the full **101-class Food-101** dataset.
-- Test metrics (25,250 held-out images): **Top-1 73.9%, Top-3 88.4%, Top-5 92.7%**.
+- Measured Food-101 test metrics (25,250 held-out images): **Top-1 73.9%, Top-3 88.4%, Top-5 92.7%**.
+- Confidence warnings and top-3 alternatives improve decision support, but do not change closed-set top-1 accuracy.
 - `best_model.keras` (40 MB) ships with the app — no external model download needed.
 - Flask API (`/api/predict`) + responsive web UI: live camera, gallery upload, drag-drop,
   top-3 probability bars, calories, ingredients, allergen alerts, warning policy.
@@ -28,6 +29,24 @@ $env:KERAS_BACKEND="torch"
 python webapp\app.py
 ```
 Open http://localhost:5000. First startup takes ~1 minute (model + backend init).
+
+## Full Food-101 retraining
+
+The reproducible full-dataset recipe uses EfficientNetV2S, streams the official
+Food-101 images from disk, reserves 10% of the official training images per class
+for validation, and evaluates the untouched 25,250-image test split:
+
+```bash
+KERAS_BACKEND=tensorflow python scripts/train_food101_full.py \
+  --epochs-frozen 8 \
+  --epochs-finetune 12 \
+  --batch-size 32
+```
+
+The best checkpoint and JSON metrics are written under `results/`. The output
+model accepts raw RGB pixels in the same `[0,255]` range as the Flask inference
+path. Replace `webapp/models/best_model.keras` only after reviewing the held-out
+test metrics.
 
 ## API
 `POST /api/predict` — multipart upload with field `image`.

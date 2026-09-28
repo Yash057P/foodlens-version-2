@@ -101,24 +101,55 @@ def train_stage(
     finetune_from: int | None = None,
     batch_size: int = 32,
 ) -> keras.callbacks.History:
+    # 1. Advanced Two-Phase Fine-Tuning
     if finetune_from is not None:
         model.trainable = True
         for layer in model.layers[:finetune_from]:
             layer.trainable = False
         print(f"  {name}: fine-tuning from layer {finetune_from} / {len(model.layers)}", flush=True)
 
-    model.compile(optimizer=keras.optimizers.Adam(lr), loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    # 2. Modern Data Augmentation Layer (Only active during training)
+    data_augmentation = keras.Sequential([
+        keras.layers.RandomFlip("horizontal"),
+        keras.layers.RandomRotation(0.15),
+        keras.layers.RandomZoom(0.15),
+        keras.layers.RandomContrast(0.1),
+    ])
+
+    # Re-wrap the model to inject augmentation natively
+    inputs = keras.Input(shape=(224, 224, 3))
+    x = data_augmentation(inputs)
+    outputs = model(x)
+    augmented_model = keras.Model(inputs, outputs)
+
+    # 3. Cosine Decay Scheduler for fine-tuning vs standard Adam
+    if finetune_from is not None:
+        decay_steps = int(np.ceil(len(x_train) / batch_size)) * epochs
+        lr_schedule = keras.optimizers.schedules.CosineDecay(
+            initial_learning_rate=lr,
+            decay_steps=decay_steps,
+            alpha=0.01  # Minimum learning rate
+        )
+        optimizer = keras.optimizers.Adam(learning_rate=lr_schedule)
+        callbacks = [
+            keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=patience, restore_best_weights=True)
+        ]
+    else:
+        optimizer = keras.optimizers.Adam(learning_rate=lr)
+        callbacks = [
+            keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=patience, restore_best_weights=True),
+            keras.callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.2, patience=max(1, patience - 1), min_lr=1e-7),
+        ]
+
+    augmented_model.compile(optimizer=optimizer, loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 
     train_seq = PreprocessSequence(x_train, y_train, preprocess_fn, batch_size=batch_size, shuffle=True)
     val_seq = PreprocessSequence(x_val, y_val, preprocess_fn, batch_size=batch_size, shuffle=False)
 
-    callbacks = [
-        keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=patience, restore_best_weights=True),
-        keras.callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.2, patience=max(1, patience - 1), min_lr=1e-7),
-    ]
+    history = augmented_model.fit(train_seq, validation_data=val_seq, epochs=epochs, callbacks=callbacks, verbose=1)
 
-    history = model.fit(train_seq, validation_data=val_seq, epochs=epochs, callbacks=callbacks, verbose=1)
-
+    # Save original model weights (not the augmentation wrapper)
+    model.set_weights(augmented_model.get_weights())
     _save_history(history, name, stage)
     _plot_history(history, name, stage)
     print(f"  {name}/{stage} finished (epochs={len(history.history['loss'])})", flush=True)

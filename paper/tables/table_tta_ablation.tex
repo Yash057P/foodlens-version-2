@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering
+\caption{Test-Time Augmentation (TTA) Ablation Study: Latency, Batch Dimensions, and Accuracy on Held-Out Test Set.}
+\label{tbl:tta_ablation}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Configuration & Batch Size & CPU Latency (ms) & Relative Latency & Prediction Variance ($\times 10^{-4}$) & Top-1 Acc (\%) \\
+\midrule
+No TTA (Baseline) & 1 & 997.05 & 0.0\% (ref) & 0.09 & 73.55\% \\
+Horizontal Flip & 2 & 1274.97 & +27.9\% & 0.09 & 73.72\% \\
+Center Crop (10\%) & 2 & 1139.06 & +14.2\% & 0.02 & 73.68\% \\
+3-Way Ensemble & 3 & 1336.27 & +34.0\% & 0.04 & 73.85\% \\
+\bottomrule
+\end{tabular}
+\end{table}

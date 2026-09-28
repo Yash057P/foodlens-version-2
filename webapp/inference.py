@@ -35,9 +35,31 @@ class FoodLensModel:
 
     def predict_bytes(self, raw: bytes) -> dict:
         img = Image.open(io.BytesIO(raw)).convert("RGB")
-        img = img.resize((IMG_SIZE, IMG_SIZE), Image.BILINEAR)
-        x = np.asarray(img, dtype=np.float32)[None, :, :, :]  # (1,224,224,3)
-        probs = keras.ops.convert_to_numpy(self.model(x))[0]  # (101,)
+        
+        # 1. Base Image
+        img_base = img.resize((IMG_SIZE, IMG_SIZE), Image.BILINEAR)
+        x_base = np.asarray(img_base, dtype=np.float32)
+        
+        # 2. Horizontally Flipped Image
+        flip_attr = getattr(Image, 'Transpose', Image)
+        img_flip = img_base.transpose(flip_attr.FLIP_LEFT_RIGHT)
+        x_flip = np.asarray(img_flip, dtype=np.float32)
+        
+        # 3. Zoomed/Cropped Image (10% center crop)
+        w, h = img.size
+        cw, ch = int(w * 0.1), int(h * 0.1)
+        img_crop = img.crop((cw, ch, w - cw, h - ch)).resize((IMG_SIZE, IMG_SIZE), Image.BILINEAR)
+        x_crop = np.asarray(img_crop, dtype=np.float32)
+        
+        # Batch TTA variations: (3, 224, 224, 3)
+        x_batch = np.stack([x_base, x_flip, x_crop])
+        
+        # Forward pass on all variations
+        preds = keras.ops.convert_to_numpy(self.model(x_batch))
+        
+        # Average the probabilities across the 3 augmented versions
+        probs = np.mean(preds, axis=0)
+        
         return self._package(probs)
 
     def _package(self, probs: np.ndarray) -> dict:

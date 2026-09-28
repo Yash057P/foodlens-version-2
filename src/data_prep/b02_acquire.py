@@ -42,5 +42,4 @@ if __name__ == "__main__":
     log.info("DONE. image files: %d | train meta: %s | test meta: %s",
              n_images,
              (FOOD101_DIR / "meta" / "train.txt").is_file(),
-             (FOOD101_DIR / "meta" / "test.txt").is_file(),
-             flush=True)
+             (FOOD101_DIR / "meta" / "test.txt").is_file())

@@ -1,0 +1,1014 @@
+I reviewed the full 8-page paper, including the rendered page layout, tables, equations, and figures. The technical idea is good, but the paper currently reads partly like a **project report/product description** rather than a polished research paper. The biggest gains will come from tightening the claims, fixing the experimental narrative, adding proper references, and correcting the page/figure/table layout. 
+
+## 1. Overall assessment
+
+The core contribution is clear:
+
+> FoodLens = EfficientNetB0 food classification + confidence/ambiguity handling + deterministic nutrition/allergen lookup + Flask API + Chrome extension.
+
+That is a reasonable **applied deep-learning/software-engineering paper**. The paper also has useful quantitative material: 25,250 test images, Top-1/Top-3/Top-5 accuracy, precision/recall/F1, per-class results, confusion analysis, and model comparisons.  
+
+However, right now I would **not submit it as-is**.
+
+The main problems are:
+
+| Area                        | Current state                          | Priority     |
+| --------------------------- | -------------------------------------- | ------------ |
+| References/citations        | Essentially missing                    | **Critical** |
+| Experimental methodology    | Incomplete in several places           | **Critical** |
+| Model-selection argument    | Contradicted by your own table         | **Critical** |
+| Claims about safety/privacy | Too strong                             | **Critical** |
+| Formatting/page balance     | Poor in several pages                  | **High**     |
+| Writing style               | Too promotional                        | **High**     |
+| Figures/tables              | Some poorly placed/under-explained     | **High**     |
+| Results discussion          | Too shallow relative to amount of data | **High**     |
+| Reproducibility             | Hyperparameters/details missing        | **High**     |
+
+---
+
+# 2. The biggest technical issue: your model-selection argument
+
+This is probably the first thing a reviewer will notice.
+
+You write:
+
+> “EfficientNetB0 was ultimately selected ... as it provided the optimal trade-off between inference latency ... and Top-1 accuracy.”
+
+But Table IV shows:
+
+* DenseNet121: **74.20% Top-1**
+* EfficientNetB0: **73.85% Top-1**
+
+So DenseNet121 actually has **higher accuracy**. 
+
+That means you cannot call EfficientNetB0 the “optimal” choice unless you provide the other side of the trade-off.
+
+### What needs to be added
+
+Add a table such as:
+
+| Model          | Parameters | Model Size | CPU latency | RAM |     Top-1 |     Top-3 |
+| -------------- | ---------: | ---------: | ----------: | --: | --------: | --------: |
+| Custom CNN     |        ... |        ... |         ... | ... |     41.32 |     62.15 |
+| ResNet50       |        ... |        ... |         ... | ... |     72.51 |     87.90 |
+| MobileNetV2    |        ... |        ... |         ... | ... |     70.15 |     86.42 |
+| DenseNet121    |        ... |        ... |         ... | ... | **74.20** | **89.10** |
+| EfficientNetB0 |        ... |        ... |         ... | ... |     73.85 |     88.44 |
+
+Then state something like:
+
+> “DenseNet121 achieved the highest classification accuracy, while EfficientNetB0 offered a slightly lower accuracy with reduced computational cost and inference latency. EfficientNetB0 was therefore selected for deployment.”
+
+That is a **defensible engineering decision**.
+
+Right now, the paper gives only accuracy but claims a latency/efficiency trade-off without presenting latency data.
+
+---
+
+# 3. Your paper needs actual references
+
+This is the most obvious formatting/content problem.
+
+The paper has a **REFERENCES** heading on page 4, but no reference list follows it. 
+
+This is especially problematic because you make statements about:
+
+* Food-101
+* EfficientNet
+* EfficientNetV2
+* ImageNet
+* MobileNetV2
+* DenseNet
+* CNNs
+* SIFT/HOG
+* transformers/LLMs
+
+without citations.
+
+For example, the related-work section discusses the Food-101 benchmark and earlier feature-based methods, but there are no numbered citations attached to those claims. 
+
+### You should use IEEE-style citations
+
+For example:
+
+> The Food-101 dataset provides a standardized benchmark for large-scale food image classification [1].
+
+Then:
+
+> EfficientNet introduced compound scaling across network depth, width, and input resolution [2].
+
+And in references:
+
+```text
+[1] L. Bossard, M. Guillaumin, and L. Van Gool, “Food-101 – Mining
+discriminative components with random forests,” in Proc. ECCV, 2014.
+
+[2] M. Tan and Q. V. Le, “EfficientNet: Rethinking model scaling
+for convolutional neural networks,” in Proc. ICML, 2019.
+```
+
+You also need the original/appropriate references for ResNet, MobileNetV2, DenseNet, ImageNet, etc.
+
+**Do not leave the references section until after you have citations throughout the paper.**
+
+---
+
+# 4. The paper is overclaiming in several places
+
+This is the second major weakness.
+
+For example, the abstract says the system achieves “dietary analysis,” but your model actually performs **classification followed by database retrieval**. It does not infer nutritional composition from the image. 
+
+A more accurate description would be:
+
+> “food recognition and database-based dietary information retrieval”
+
+rather than implying comprehensive dietary analysis.
+
+### Replace promotional phrases
+
+You currently use wording such as:
+
+> “massive, per-class evaluation” 
+
+> “highly capable for real-world dietary assistance” 
+
+> “production-ready application” 
+
+> “state-of-the-art architectures” 
+
+These sound like marketing language.
+
+### Use academic wording instead
+
+Instead of:
+
+> “massive, per-class evaluation”
+
+Use:
+
+> “a per-class evaluation across all 101 categories”
+
+Instead of:
+
+> “highly capable for real-world dietary assistance”
+
+Use:
+
+> “demonstrates the feasibility of deploying food-recognition functionality in a web-based application.”
+
+Instead of:
+
+> “production-ready”
+
+Use:
+
+> “deployment-oriented” or “prototype deployment architecture”
+
+unless you have actual production-scale evidence.
+
+---
+
+# 5. Be very careful with the allergen/safety claim
+
+This sentence is too strong:
+
+> “This guarantees O(1) time complexity and prevents hallucination of allergens.” 
+
+A deterministic mapping **can prevent generative hallucination**, but it does not guarantee that the allergen information itself is correct.
+
+For example:
+
+```text
+Predicted class → database record → allergen information
+```
+
+The model can misclassify the food, the mapping can be incomplete, and recipes vary.
+
+A better statement:
+
+> “The deterministic lookup design avoids generative inference of ingredient and allergen information. However, the retrieved information remains dependent on the correctness and completeness of the underlying database.”
+
+That is much more defensible.
+
+Similarly, your “complete compliance with modern data protection regulations” statement is too strong. 
+
+Replace it with:
+
+> “The architecture reduces unnecessary transmission of user images to third-party services by performing inference within the deployed backend. Formal regulatory compliance was not evaluated as part of this study.”
+
+That is academically much safer.
+
+---
+
+# 6. The confidence/ambiguity algorithm needs proper evaluation
+
+The concept itself is good.
+
+You define:
+
+* `Ptop1 < 0.45` → uncertain
+* `Ptop1 - Ptop2 < 0.10` → ambiguous. 
+
+But then you show a “warning system calibration curve” without sufficiently explaining how it was produced. 
+
+A reviewer will ask:
+
+**Why 0.45? Why 0.10?**
+
+You should report something like:
+
+```text
+Threshold        Coverage        Accuracy        Rejection rate
+0.30             ...
+0.40             ...
+0.45             ...
+0.50             ...
+0.60             ...
+```
+
+For the ambiguity threshold, similarly evaluate several values:
+
+```text
+Delta threshold       Ambiguous cases       Accuracy after filtering
+0.05                   ...
+0.10                   ...
+0.15                   ...
+0.20                   ...
+```
+
+Then justify the chosen threshold based on measured validation performance.
+
+Otherwise, they look like manually chosen magic numbers.
+
+---
+
+# 7. TTA needs actual evidence
+
+The TTA section is conceptually useful: three image variants are processed and probabilities are averaged. 
+
+But you claim:
+
+> “yielding a direct accuracy boost for the end-user.”
+
+That requires an experiment.
+
+Show:
+
+| Configuration   | Top-1 | Top-3 | Latency |
+| --------------- | ----: | ----: | ------: |
+| No TTA          |    XX |    XX |   XX ms |
+| Horizontal flip |    XX |    XX |   XX ms |
+| Crop            |    XX |    XX |   XX ms |
+| 3-way TTA       | 73.85 | 88.44 |   XX ms |
+
+This becomes a useful ablation study.
+
+Otherwise change:
+
+> “yielding a direct accuracy boost”
+
+to:
+
+> “designed to improve robustness to viewpoint and lighting variation.”
+
+---
+
+# 8. The evaluation section needs more interpretation
+
+You have good numbers, but the paper mostly **reports** them rather than **analyzes** them.
+
+For example, Table I gives:
+
+* Top-1 = 73.85%
+* Top-3 = 88.44%
+* Top-5 = 92.65%
+* Macro-F1 = 73.74%. 
+
+But what does that mean?
+
+You should explicitly discuss:
+
+> “The 14.59 percentage-point difference between Top-1 and Top-3 indicates that many incorrect Top-1 predictions remain within the model's top three candidates.”
+
+That directly supports the rationale for showing Top-3 results in the UI.
+
+Your UI claim and your results should be connected:
+
+**Model → uncertainty → Top-3 → ambiguity → user experience.**
+
+That would make the paper much more coherent.
+
+---
+
+# 9. Your worst-class analysis is actually valuable — use it better
+
+Table II is good because it reveals where the model fails.
+
+For example:
+
+* foie gras: 42.8%
+* steak: 45.6%
+* apple pie: 46.0%
+* pork chop: 47.6%
+* ceviche: 48.4%. 
+
+And the confusion table identifies pairs such as:
+
+* steak → filet mignon
+* filet mignon → steak
+* tuna tartare → beef tartare
+* cheesecake → strawberry shortcake. 
+
+This is one of the strongest parts of your paper.
+
+Instead of only listing them, discuss **why** they occur:
+
+> “Errors are concentrated among visually similar food classes. For example, steak and filet mignon account for reciprocal confusion, suggesting that the model has difficulty learning discriminative visual features when class boundaries are semantically and visually similar.”
+
+Then connect that to your ambiguity mechanism.
+
+That makes the paper feel like research rather than a project report.
+
+---
+
+# 10. Figure 3 is not very useful in its current form
+
+The full 101 × 101 confusion matrix occupies almost an entire page, but the labels are essentially unreadable at normal paper scale. The diagonal dominates visually. 
+
+This is a classic case where **more data does not mean more useful information**.
+
+I would replace it with:
+
+### Main paper
+
+A compact heatmap of the **top 10 confused class pairs**, or perhaps a normalized confusion matrix with only the relevant subset.
+
+### Appendix
+
+Keep the full 101 × 101 matrix in the appendix/supplement.
+
+That would dramatically improve the paper.
+
+---
+
+# 11. Figure 4 is useful, but change its interpretation
+
+The misclassified examples are visually useful. They show that the system can make severe mistakes such as apple pie → takoyaki, poutine, chocolate cake, etc. 
+
+However, your caption says:
+
+> “Examples of severe misclassifications where the model predicted incorrectly with high confidence.”
+
+You need to make sure **high confidence is actually measured** for those images.
+
+If the images were merely selected because they were misclassified, don't call them high-confidence examples.
+
+Either:
+
+> “Representative misclassified examples from the held-out test set.”
+
+or give their actual confidence values.
+
+---
+
+# 12. Page 5 is a serious formatting problem
+
+This is probably the most visually obvious issue.
+
+Page 5 contains only Table V and then a huge amount of empty space.
+
+Then page 6 contains the giant confusion matrix.
+
+Then page 7 contains the misclassified images.
+
+Then page 8 contains one small confusion matrix.
+
+This creates a paper that visually feels unfinished.
+
+The rendered document clearly shows the imbalance: page 5 is almost empty, while the later pages are dominated by single figures. 
+
+### I would restructure the final pages
+
+Something like:
+
+**Page 4**
+
+* Model benchmark
+* Results discussion
+* Table IV
+* start of limitations
+
+**Page 5**
+
+* Error analysis
+* Table III
+* Table V
+* Figure 5 (steak vs filet mignon)
+* Discussion
+
+**Page 6**
+
+* Representative misclassifications
+* Figure 4
+* Limitations
+* Conclusion
+
+**Page 7**
+
+* References
+
+**Page 8**
+
+* Appendix / full confusion matrix
+
+That would look much more intentional.
+
+---
+
+# 13. Your section order should be changed
+
+Currently you have:
+
+```text
+I Introduction
+II Related Work
+III System Methodology and Algorithms
+IV System Architecture and Deployment
+V Extended Architectural Review and Accuracy Optimization
+VI Extensive Product Evaluation
+VII Conclusion
+Appendix A
+Appendix B
+References
+```
+
+There is an odd separation between your architecture and training methodology.
+
+I'd restructure it as:
+
+```text
+I. Introduction
+II. Related Work
+III. System Architecture
+   A. Overall Architecture
+   B. Backend API
+   C. Chrome Extension
+IV. Methodology
+   A. Food Classification
+   B. Data Augmentation
+   C. Fine-Tuning
+   D. Confidence and Ambiguity Detection
+   E. Nutrition and Allergen Retrieval
+   F. Test-Time Augmentation
+V. Experimental Setup
+   A. Dataset
+   B. Training Configuration
+   C. Evaluation Metrics
+   D. Hardware and Software
+VI. Results and Discussion
+   A. Overall Performance
+   B. Model Comparison
+   C. Per-Class Performance
+   D. Confusion Analysis
+   E. Ablation Studies
+VII. Deployment, Privacy, and Limitations
+VIII. Conclusion
+References
+Appendix
+```
+
+That is a much more conventional research-paper structure.
+
+---
+
+# 14. You are missing an Experimental Setup section
+
+This is a significant technical omission.
+
+I need to know things like:
+
+* Food-101 train/test split
+* Image preprocessing
+* batch size
+* optimizer
+* initial learning rate
+* number of epochs
+* frozen-phase epochs
+* fine-tuning epochs
+* number of unfrozen layers
+* loss function
+* hardware
+* TensorFlow/Keras version
+* Python version
+* inference hardware
+* whether the test set was completely untouched until final evaluation.
+
+You discuss sophisticated training techniques such as two-phase fine-tuning and cosine decay, but not enough experimental detail to reproduce them. 
+
+For an academic paper, reproducibility matters.
+
+---
+
+# 15. Dataset information needs to be explicitly stated
+
+You state that the test set has 25,250 images and that there are 101 classes. 
+
+Add a small dataset table:
+
+| Property        |                Value |
+| --------------- | -------------------: |
+| Dataset         |             Food-101 |
+| Classes         |                  101 |
+| Training images |               75,750 |
+| Test images     |               25,250 |
+| Images/class    | 750 train / 250 test |
+
+Then explicitly state:
+
+> “The official test split was not used during model selection or training.”
+
+That is a useful methodological clarification.
+
+---
+
+# 16. The title can be tightened
+
+Current:
+
+> **FoodLens: An End-to-End Deep Learning Product for Smart Food Recognition and Dietary Analysis** 
+
+“Smart” and “dietary analysis” sound somewhat marketing-oriented.
+
+I'd use:
+
+### Option A
+
+**FoodLens: An End-to-End Deep Learning System for Food Recognition and Dietary Information Retrieval**
+
+### Option B
+
+**FoodLens: An EfficientNet-Based System for Food Recognition with Confidence-Aware Dietary Information Retrieval**
+
+Option B is more research-oriented and tells the reader what's technically distinctive.
+
+---
+
+# 17. The abstract needs rewriting
+
+Your current abstract is good in structure but too product-marketing-heavy. It also makes some claims stronger than your experiments support. 
+
+### Suggested abstract
+
+> **Abstract—** Food recognition from images is challenging due to substantial intra-class variation and visual similarity between food categories. This paper presents FoodLens, an end-to-end deep learning system that combines food classification with confidence-aware prediction and database-based dietary information retrieval. The system uses an ImageNet-pretrained EfficientNetB0 model to classify images into 101 Food-101 categories and integrates data augmentation, two-phase fine-tuning, and test-time augmentation for robust inference. A deterministic confidence and ambiguity module flags low-confidence and closely competing predictions, while a structured database provides ingredient, calorie, and allergen information for recognized classes. The model was evaluated on the official Food-101 test set containing 25,250 images, achieving 73.85% Top-1, 88.44% Top-3, and 92.65% Top-5 accuracy, with a macro F1-score of 73.74%. The trained model is exposed through a Flask REST API and integrated into a Manifest V3 Chrome extension. Experimental analysis further identifies visually similar food categories as the primary source of classification errors. The results demonstrate the feasibility of integrating food recognition and confidence-aware information retrieval into a lightweight web-based application.
+
+That is considerably more academic.
+
+---
+
+# 18. Introduction should establish a research problem, not just a product
+
+Current introduction:
+
+> “Our primary objective is to deliver a functional software system.” 
+
+That is okay for a project report, but weaker for a paper.
+
+Instead establish:
+
+### Problem
+
+Food recognition is difficult due to visual similarity and intra-class variability.
+
+### Gap
+
+Pure classification performance does not address uncertainty or downstream dietary information.
+
+### Approach
+
+FoodLens combines classification + uncertainty detection + deterministic retrieval + deployment.
+
+### Contributions
+
+Explicitly list 3–4 contributions:
+
+> The main contributions of this work are:
+>
+> 1. An EfficientNetB0-based food-recognition pipeline for 101 Food-101 classes.
+> 2. A deterministic confidence and ambiguity mechanism for handling uncertain predictions.
+> 3. A database-driven nutrition and allergen retrieval layer that avoids generative inference.
+> 4. An integrated Flask API and browser-extension deployment architecture.
+
+That gives the paper a clear research identity.
+
+---
+
+# 19. Fix the terminology around “hallucination”
+
+You're repeatedly using:
+
+> “prevent hallucinations”
+
+That term is primarily associated with generative models.
+
+Your classifier doesn't “hallucinate” in exactly the same sense. Better terms are:
+
+* incorrect prediction
+* unsupported inference
+* erroneous dietary information
+* generative fabrication
+
+Use:
+
+> “avoids generative fabrication of dietary attributes”
+
+when talking about the database approach.
+
+---
+
+# 20. “O(1)” should be qualified
+
+You write:
+
+> “strict, O(1) JSON mapping database” 
+
+That's only meaningful if the implementation is actually an in-memory hash/dictionary lookup.
+
+Also, the overall operation is obviously not O(1), because the dominant cost is CNN inference.
+
+Better:
+
+> “A direct key-based lookup provides approximately constant-time retrieval after classification.”
+
+Don't imply the entire system is O(1).
+
+---
+
+# 21. The privacy section needs more nuance
+
+The local backend is a nice architectural feature. You say images are held temporarily in RAM and flushed after inference. 
+
+However, you should specify:
+
+* Is the API local to the user's machine?
+* Is the Flask backend hosted on the same machine?
+* Is traffic encrypted with HTTPS?
+* Are logs generated?
+* Are uploaded images written to `/tmp` or disk?
+* Are request payloads logged?
+* Does Flask development mode get used?
+* Is the Chrome extension communicating across localhost?
+
+Without these details, “privacy-first” is too broad.
+
+---
+
+# 22. Table formatting
+
+Your tables are generally readable, but they can be improved.
+
+### Table I
+
+Good content, but add a note such as:
+
+> “All metrics are computed on the official Food-101 test set (25,250 images).”
+
+### Table II
+
+It currently says:
+
+> “15 best and 15 worst classes”
+
+which is good, but visually there is a large `( . . . )` gap. 
+
+Better:
+
+```text
+Top-performing classes
+----------------------
+...
+
+Bottom-performing classes
+-------------------------
+...
+```
+
+rather than pretending it is one continuous table.
+
+### Table III
+
+Add percentage/share information if possible.
+
+For example:
+
+| True | Predicted | Errors | Error rate |
+| ---- | --------- | -----: | ---------: |
+
+That would make it more useful.
+
+### Table V
+
+Table V duplicates information already present in Table II. 
+
+I would **remove Table V** entirely and discuss the bottom classes directly in the error-analysis subsection.
+
+That frees a significant amount of space.
+
+---
+
+# 23. Figure captions need to be more informative
+
+For example:
+
+> “Fig. 2. Example of Top-3 output predictions generated by the web API.” 
+
+Better:
+
+> **Fig. 2. Example Top-3 predictions returned by the FoodLens inference API for a pizza image.**
+
+For Figure 5:
+
+> **Fig. 5. Confusion matrix for the two most frequently confused classes, steak and filet mignon, on the held-out test set.**
+
+Captions should explain what the reader is looking at without having to search the text.
+
+---
+
+# 24. Page 8 needs to be redesigned
+
+Page 8 contains basically one small 2×2 matrix and its caption. 
+
+That is inefficient.
+
+Move Figure 5 into the error-analysis section on an earlier page.
+
+Then page 8 can either disappear entirely or become an appendix containing:
+
+* full confusion matrix
+* supplementary examples
+* complete class list
+
+Don't dedicate an entire page to one tiny figure.
+
+---
+
+# 25. Appendix placement is wrong
+
+You currently have:
+
+```text
+APPENDIX A...
+APPENDIX B...
+REFERENCES
+```
+
+but “REFERENCES” appears before later appendix material.  
+
+For conventional IEEE structure:
+
+```text
+VIII. Conclusion
+
+References
+
+Appendix A
+...
+Appendix B
+...
+```
+
+Depending on the exact IEEE template, appendices may appear before references, but they must be organized consistently with the template you're targeting. **The current arrangement definitely needs correction.**
+
+---
+
+# 26. Full 101-class list is unnecessary
+
+Pages 6 contain a huge list of class labels associated with the confusion matrix. 
+
+This adds little value in the main paper.
+
+Put the full confusion matrix and class labels into:
+
+> **Appendix A: Complete Confusion Matrix**
+
+and keep only the most important confusion examples in the main text.
+
+---
+
+# 27. Formatting standard I recommend
+
+The existing document is visually based on an IEEE two-column layout, so I would keep that rather than redesigning it completely.
+
+### Recommended IEEE-style formatting
+
+**Paper**
+
+* A4/Letter according to your target template
+* 2 columns
+* Times New Roman / IEEE template font
+* 10 pt body text
+* justified body text
+* standard IEEE section headings
+* numbered references
+* numbered equations
+* figure captions below figures
+* table captions above tables
+* consistent spacing around floats
+
+**Figures**
+
+* Same visual style throughout
+* Minimum readable axis/label font
+* No gigantic low-information figures
+* Export charts at high resolution
+* Keep captions with figures
+
+**Tables**
+
+* Use consistent decimal precision
+* Percentages consistently formatted
+* Align numeric columns
+* Avoid excessive borders
+* Make table width fit one or two columns intentionally
+
+**Equations**
+
+* Centered
+* Equation number at right
+* Define every variable immediately after the equation
+
+---
+
+# 28. Your equation needs a cleaner presentation
+
+You currently have the softmax equation:
+
+$$
+P_i = \frac{e^{z_i}}{\sum_{j=1}^{101} e^{z_j}}
+\tag{1}
+$$
+
+Then:
+
+> “where \(z_i\) are the logits output by the final fully connected layer.” 
+
+That's fine, but expand it slightly:
+
+> where \(z_i\) denotes the logit associated with class \(i\), and \(P_i\) is the corresponding predicted probability for \(i \in \{1,\ldots,101\}\).
+
+Also ensure the equation is rendered as a real equation object rather than manually formatted text.
+
+---
+
+# 29. The paper needs a limitations section
+
+This is currently missing, and adding one will actually make the paper stronger.
+
+Include:
+
+### Limitations
+
+1. FoodLens is restricted to the 101 Food-101 categories.
+2. Classification performance varies substantially between visually similar classes.
+3. Nutrition/allergen information depends on a curated database and may not represent recipe-level variation.
+4. The model may fail on non-food or unseen food categories.
+5. The evaluation uses the Food-101 benchmark rather than a newly collected real-world dataset.
+6. No formal clinical or nutritional validation was performed.
+
+That last point is especially important given the dietary/allergen angle.
+
+---
+
+# 30. One particularly important conceptual correction
+
+This sentence:
+
+> “FoodLens is designed with privacy as a foundational principle.”
+
+is fine.
+
+But:
+
+> “ensures complete compliance with modern data protection regulations”
+
+is not justified by the experiment.
+
+Similarly:
+
+> “reliable for real-world dietary assistance”
+
+is not supported by testing only Food-101.
+
+The distinction you want throughout the paper is:
+
+**What you built**
+vs.
+**What you experimentally demonstrated**
+vs.
+**What you theoretically expect.**
+
+That distinction will make the paper much more credible.
+
+---
+
+# 31. Recommended final structure
+
+I would turn this 8-page paper into roughly **6–7 strong pages plus references/appendix**:
+
+```text
+Title
+Authors + affiliation
+
+Abstract
+Index Terms
+
+I. INTRODUCTION
+   Problem
+   Motivation
+   Contributions
+
+II. RELATED WORK
+   Food recognition
+   Efficient CNNs
+   Food/dietary applications
+
+III. SYSTEM ARCHITECTURE
+   Overall pipeline
+   Flask API
+   Chrome extension
+   Database lookup
+
+IV. METHODOLOGY
+   A. EfficientNetB0
+   B. Data augmentation
+   C. Fine-tuning
+   D. Confidence/ambiguity detection
+   E. Nutrition/allergen retrieval
+   F. TTA
+
+V. EXPERIMENTAL SETUP
+   Dataset
+   Training configuration
+   Hardware/software
+   Evaluation metrics
+
+VI. RESULTS AND DISCUSSION
+   A. Overall metrics
+   B. Model comparison
+   C. Ablation/TTA
+   D. Per-class results
+   E. Error analysis
+
+VII. DEPLOYMENT, PRIVACY AND LIMITATIONS
+
+VIII. CONCLUSION
+
+REFERENCES
+
+APPENDIX
+   Full confusion matrix
+   Additional examples
+```
+
+This would be much more coherent.
+
+---
+
+# 32. What I would keep unchanged
+
+There is good material here and I would **not throw the paper away**.
+
+Keep:
+
+* EfficientNetB0 implementation
+* Food-101 evaluation
+* Top-1/3/5 results
+* macro precision/recall/F1
+* model benchmark
+* confidence threshold concept
+* ambiguity delta concept
+* TTA
+* Chrome extension architecture
+* per-class analysis
+* confusion-pair analysis
+* misclassified-image analysis
+
+These provide enough substance for a solid applied paper.   
+
+## My priority order for fixing it
+
+**First:** add references and in-text citations.
+
+**Second:** fix the DenseNet121 vs EfficientNetB0 model-selection argument by adding latency/parameter/model-size measurements.
+
+**Third:** add Experimental Setup and sufficient reproducibility details.
+
+**Fourth:** remove overclaims about “hallucination,” “complete compliance,” “production-ready,” and “real-world dietary assistance.”
+
+**Fifth:** reorganize the paper so methodology → experiment → results → discussion flows naturally.
+
+**Sixth:** fix the pagination: especially the mostly empty page 5 and page 8, and move the full confusion matrix to the appendix.
+
+**Seventh:** improve the error analysis and add an ablation experiment for TTA and confidence thresholds.
+
+The paper's **technical foundation is considerably better than its current presentation suggests**. The main task is not adding random material; it is making the claims line up tightly with the experiments and making the formatting look like a deliberate research paper rather than a project document.

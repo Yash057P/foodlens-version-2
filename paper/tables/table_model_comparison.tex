@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\caption{Model Architecture Comparison: Parameter Counts, Footprint, CPU Latency, and Held-Out Performance.}
+\label{tbl:model_comparison}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Model Architecture & Parameters (M) & Model Size (MB) & CPU Latency (ms) & Top-1 Acc (\%) & Top-3 Acc (\%) \\
+\midrule
+Custom CNN & 0.10M & 0.37 & 46.40 & 41.32\% & 62.15\% \\
+MobileNetV2 & 2.28M & 8.71 & 423.69 & 70.15\% & 86.42\% \\
+EfficientNetB0 & 4.08M & 15.55 & 2046.05 & 73.85\% & 88.44\% \\
+DenseNet121 & 7.06M & 26.92 & 2100.16 & 74.20\% & 89.10\% \\
+ResNet50 & 23.63M & 90.14 & 893.11 & 72.51\% & 87.90\% \\
+\bottomrule
+\end{tabular}
+\end{table}
