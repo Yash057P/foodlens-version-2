@@ -1,0 +1,50 @@
+{
+  "provenance": "Recomputed on Kaggle GPU from the deployed checkpoint using all images listed by the official Food-101 meta/test.txt split.",
+  "dataset": "Food-101 official test split",
+  "test_images": 25250,
+  "metrics": {
+    "top1": 0.7343762376,
+    "top3": 0.8821386139,
+    "top5": 0.9236831683,
+    "macro_precision": 0.7360803234,
+    "macro_recall": 0.7343762376,
+    "macro_f1": 0.73374476
+  },
+  "calibration": {
+    "status": "fitted",
+    "method": "scalar_temperature_scaling",
+    "temperature": 1.3499774224,
+    "fit_split": "seeded 15% Food-101 official training partition",
+    "fit_samples": 11363,
+    "evaluation_split": "Food-101 official test partition",
+    "samples": 25250,
+    "validation_nll_before": 1.2570413351,
+    "validation_nll_after": 1.1896660712,
+    "nll_before": 0.9953304529,
+    "nll_after": 0.9726579364,
+    "ece_before": 0.0446763127,
+    "ece_after": 0.0357243504
+  },
+  "worst_classes": [
+    ["apple_pie", 0.436], ["foie_gras", 0.436], ["pork_chop", 0.46],
+    ["steak", 0.46], ["ceviche", 0.496], ["huevos_rancheros", 0.504],
+    ["scallops", 0.516], ["ravioli", 0.52], ["grilled_salmon", 0.544],
+    ["filet_mignon", 0.548]
+  ],
+  "confusions": [
+    ["steak", "filet_mignon", 44], ["filet_mignon", "steak", 40],
+    ["beef_tartare", "tuna_tartare", 34], ["chocolate_cake", "chocolate_mousse", 33],
+    ["apple_pie", "bread_pudding", 31], ["pork_chop", "filet_mignon", 30],
+    ["steak", "prime_rib", 27], ["ramen", "pho", 25]
+  ],
+  "tta_ablation": [
+    {"configuration": "Single view", "views": 1, "latency_ms": 997.05, "top1": 0.7355},
+    {"configuration": "Horizontal flip", "views": 2, "latency_ms": 1274.97, "top1": 0.7372},
+    {"configuration": "Centre crop", "views": 2, "latency_ms": 1139.06, "top1": 0.7368},
+    {"configuration": "3-view ensemble", "views": 3, "latency_ms": 1336.27, "top1": 0.7385}
+  ],
+  "architecture_comparison": {
+    "status": "engineering_cost_only",
+    "note": "The reproducible benchmark compares parameter count, estimated weight size, and CPU latency. It does not claim comparative accuracy because the alternative architectures were not trained under the same protocol."
+  }
+}

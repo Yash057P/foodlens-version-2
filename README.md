@@ -30,6 +30,46 @@ python webapp\app.py
 ```
 Open http://localhost:5000. First startup takes ~1 minute (model + backend init).
 
+## Viva-ready Docker demo
+
+Build, start, health-check, and browser-test the complete application with one
+PowerShell command:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\verify_docker.ps1
+```
+
+Open http://localhost:5000 and select **Viva mode** for a five-step explanation
+of preprocessing, EfficientNetB0 feature extraction, TTA aggregation, confidence
+rails, and the deterministic nutrition lookup. The container uses Gunicorn,
+warms the model before reporting ready, and exposes Docker health status through
+`/api/health`.
+
+To choose reliable real photographs for the demonstration, place candidate
+images in a local folder and rank them with the running model:
+
+```powershell
+python scripts\select_viva_samples.py C:\path\to\food-photos
+```
+
+Visually verify every suggested label. Use one clear high-confidence photograph
+for the successful classification and one difficult or non-food image to explain
+the low-confidence and ambiguity warnings.
+
+## Personalized and continuously improving
+
+- **Food profile:** locally stores selected allergy concerns and diet preferences,
+  then highlights possible conflicts from the reference ingredient entry.
+- **Correction loop:** saves confirmed or corrected Food-101 labels to the
+  persistent `foodlens-feedback` Docker volume. Photo retention is explicit,
+  optional, and off by default. Opted-in samples can be exported for human review.
+- **Nearby discovery:** opens a Maps search for the predicted dish and lets the
+  user compare third-party restaurant ratings.
+
+These are decision-support features. FoodLens cannot verify allergens, recipe
+composition, cross-contact, or medical suitability from an image. See
+`docs/ENHANCEMENT_ROADMAP.md` for the scoped enhancement classification.
+
 ## Full Food-101 retraining
 
 The reproducible full-dataset recipe uses EfficientNetV2S, streams the official
@@ -63,7 +103,33 @@ Returns top-3 predictions with probabilities, ingredients, calories, allergens a
 }
 ```
 
-Other endpoints: `GET /api/health`, `GET /api/classes`.
+Other endpoints: `GET /api/health`, `GET /api/classes`, `GET /api/evaluation`,
+`POST /api/explain`, `POST /api/compare-tta`, and `POST /api/feedback`.
+
+## Viva-focused deep-learning evidence
+
+The web app now exposes Grad-CAM explanations, normalized prediction entropy,
+top-1 margin, configurable confidence threshold, single-view versus 3-view TTA,
+image-quality checks, and a downloadable prediction report. The Model Evaluation
+page presents held-out Food-101 metrics, weakest classes, confusion pairs, and the
+stored TTA ablation with provenance.
+
+Supporting workflows:
+
+```powershell
+python scripts\export_feedback.py --feedback path\to\feedback.jsonl
+python scripts\calibrate_temperature.py --predictions data\preprocessed\food101_preds.npz
+python scripts\benchmark_architectures.py --runs 5
+python scripts\quantize_model.py --model webapp\models\best_model.keras
+```
+
+Temperature calibration was fitted from 11,363 seeded development predictions
+generated on Kaggle and evaluated on the untouched 25,250-image official test
+split. Live probabilities use scalar temperature 1.350; test ECE fell from 4.47%
+to 3.57% and NLL from 0.995 to 0.973. The cost benchmark uses random
+weights and compares engineering cost only, never accuracy.
+The current mixed-precision EfficientNet graph also requires converter work before
+standard TFLite FP16 export succeeds.
 
 ## Deploying to Render (free)
 1. Push this repo to GitHub.

@@ -1,6 +1,10 @@
-```gitignore
 # Python cache
 __pycache__/
+artifacts/
+.kaggle-existing/
+.kaggle-model-upload/
+.kaggle-eval/
+.kaggle-eval-output/
 *.pyc
 *.pyo
 *.pyd
@@ -12,4 +16,14 @@ docs/_build/
 /data/
 /results/
 /best_model.keras
-```
+
+# Local runtime files
+.env*
+webapp/uploads/
+*.log
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

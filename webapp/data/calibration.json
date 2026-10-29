@@ -1,0 +1,16 @@
+{
+  "status": "fitted",
+  "method": "scalar_temperature_scaling",
+  "temperature": 1.3499774224,
+  "fit_split": "seeded 15% Food-101 official training partition",
+  "fit_samples": 11363,
+  "evaluation_split": "Food-101 official test partition",
+  "samples": 25250,
+  "validation_nll_before": 1.2570413351,
+  "validation_nll_after": 1.1896660712,
+  "nll_before": 0.9953304529,
+  "nll_after": 0.9726579364,
+  "ece_before": 0.0446763127,
+  "ece_after": 0.0357243504,
+  "source": "Kaggle FoodLens official Food-101 test evaluation version 3"
+}
