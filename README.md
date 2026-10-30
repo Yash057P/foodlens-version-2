@@ -52,6 +52,10 @@ images in a local folder and rank them with the running model:
 python scripts\select_viva_samples.py C:\path\to\food-photos
 ```
 
+Twelve neutral-filename Food-101 validation images are retained under
+`webapp/static/demo-food101/` for manual viva uploads. Their private labels,
+source rows, and hashes are recorded in `docs/FOOD101_DEMO_SAMPLES.md`.
+
 Visually verify every suggested label. Use one clear high-confidence photograph
 for the successful classification and one difficult or non-food image to explain
 the low-confidence and ambiguity warnings.

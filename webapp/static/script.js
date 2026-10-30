@@ -44,6 +44,16 @@ const ttaToggle = $('ttaToggle');
 const thresholdRange = $('thresholdRange');
 const modelToolStatus = $('modelToolStatus');
 
+// Apply the saved theme from the external bundle so a strict script policy can
+// reject inline code without changing user preferences.
+try {
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-theme', 'dark');
+} catch (_error) {
+  // Storage can be unavailable in privacy modes; the default remains usable.
+}
+
 // Camera elements
 const cameraModal = $('cameraModal');
 const cameraVideo = $('cameraVideo');
@@ -52,6 +62,7 @@ const fallbackInput = $('fallbackInput');
 const btnSnap = $('btnSnap');
 const btnCamClose = $('btnCamClose');
 const btnFlip = $('btnFlip');
+const btnCameraFallback = $('btnCameraFallback');
 
 let selectedFile = null;
 let stream = null;
@@ -170,6 +181,7 @@ function navigate(page) {
 }
 
 $('btnBack').style.visibility = 'hidden';
+$('btnDiscoverDish').addEventListener('click', () => navigate('scan'));
 
 /* ========== UPLOAD ========== */
 uploadZone.addEventListener('click', (e) => {
@@ -181,9 +193,10 @@ fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
 galleryInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
 $('btnGallery').addEventListener('click', (e) => { e.stopPropagation(); galleryInput.click(); });
 fallbackInput.addEventListener('change', (e) => { 
-  cameraModal.classList.add('hidden'); 
+  closeCamera();
   handleFile(e.target.files[0]); 
 });
+btnCameraFallback.addEventListener('click', () => fallbackInput.click());
 
 uploadZone.ondragover = (e) => { e.preventDefault(); uploadZone.classList.add('over'); };
 uploadZone.ondragleave = () => uploadZone.classList.remove('over');
@@ -229,6 +242,9 @@ window.addEventListener('pagehide', closeCamera);
 
 async function openCamera() {
   cameraMsg.classList.add('hidden');
+  btnCameraFallback.classList.add('hidden');
+  btnSnap.classList.remove('hidden');
+  cameraModal.classList.remove('hidden');
   
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     try {
@@ -247,12 +263,19 @@ async function openCamera() {
       return;
     } catch (err) {
       console.warn('Camera access failed:', err);
-      showCameraMsg('Camera unavailable. Select an image from the gallery instead.');
+      const permissionDenied = err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
+      showCameraMsg(permissionDenied
+        ? 'Camera permission was denied. Allow camera access in your browser settings, or choose a photo instead.'
+        : 'The camera is unavailable on this device or browser. Choose a photo instead.');
     }
+  } else {
+    showCameraMsg(window.isSecureContext
+      ? 'This browser does not provide camera access. Choose a photo instead.'
+      : 'Camera access requires HTTPS or localhost. Open the secure site or choose a photo instead.');
   }
-  
-  // Fallback to file input
-  setTimeout(() => fallbackInput.click(), 500);
+
+  btnSnap.classList.add('hidden');
+  btnCameraFallback.classList.remove('hidden');
 }
 
 function captureFrame() {
@@ -296,6 +319,25 @@ function showCameraMsg(msg) {
   cameraMsg.classList.remove('hidden'); 
 }
 
+async function readJsonResponse(response) {
+  const contentType = response.headers.get('content-type') || '';
+  const body = await response.text();
+  if (contentType.includes('application/json') && body) {
+    try {
+      return JSON.parse(body);
+    } catch (_error) {
+      // Continue to an actionable server message below.
+    }
+  }
+  if (!response.ok) {
+    if ([502, 503, 504].includes(response.status)) {
+      throw new Error('The hosted AI service is restarting or temporarily out of capacity. Wait about a minute and try again.');
+    }
+    throw new Error(`The server returned an invalid response (HTTP ${response.status}).`);
+  }
+  throw new Error('The server returned an empty or invalid response. Please try again.');
+}
+
 /* ========== ANALYZE ========== */
 btnScan.addEventListener('click', () => analyze(false));
 btnClear.addEventListener('click', resetScan);
@@ -325,14 +367,14 @@ async function analyze(silent) {
   
   try {
     const res = await fetch('/api/predict', { method: 'POST', body: form });
-    const data = await res.json();
+    const data = await readJsonResponse(res);
     
     if (!res.ok || data.status !== 'ok') {
       throw new Error(data.message || 'Server error occurred');
     }
     
     renderResults(data);
-    addToHistory(data);
+    await addToHistory(data);
   } catch (err) {
     showNotice(err.message || 'Failed to analyze image. Please try again.', true);
   } finally {
@@ -718,8 +760,31 @@ function loadHistory() {
   }
 }
 
-function addToHistory(data) {
-  const thumb = previewImg.src;
+async function createHistoryThumbnail(file) {
+  if (!file) return '';
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onerror = () => resolve('');
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => resolve('');
+      image.onload = () => {
+        const maxSide = 160;
+        const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function addToHistory(data) {
+  const thumb = await createHistoryThumbnail(selectedFile);
   history.unshift({
     id: Date.now(),
     food: data.lead_name || 'Unknown',
@@ -750,9 +815,14 @@ function renderHistory() {
     return;
   }
   
-  historyList.innerHTML = history.map((h) => `
+  historyList.innerHTML = history.map((h) => {
+    const hasPersistentThumb = typeof h.thumb === 'string' && h.thumb.startsWith('data:image/');
+    const thumbnail = hasPersistentThumb
+      ? `<img class="hist-thumb" src="${escapeHtml(h.thumb)}" alt="${escapeHtml(h.food)}"/>`
+      : `<div class="hist-thumb hist-thumb-fallback" aria-hidden="true">${escapeHtml((h.food || '?').slice(0, 1).toUpperCase())}</div>`;
+    return `
     <div class="hist-item">
-      <img class="hist-thumb" src="${escapeHtml(h.thumb)}" alt="${escapeHtml(h.food)}"/>
+      ${thumbnail}
       <div class="hist-info">
         <div class="hist-food">${escapeHtml(h.food)}</div>
         <div class="hist-sub">${h.conf}% | ${formatDate(h.ts)}</div>
@@ -760,7 +830,8 @@ function renderHistory() {
       <button class="hist-del" data-id="${h.id}" aria-label="Delete entry">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
     
   // Add delete handlers
   historyList.querySelectorAll('.hist-del').forEach((b) => {

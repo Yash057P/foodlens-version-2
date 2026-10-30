@@ -47,7 +47,9 @@ class FoodLensModel:
         self._predict_lock = threading.Lock()
         # Run one real forward pass at startup so the first viva prediction does
         # not pay graph tracing and kernel initialization costs.
-        warmup_batch = np.zeros((3, IMG_SIZE, IMG_SIZE, 3), dtype=np.float32)
+        # Keep the warmup and inference passes at batch size 1 to avoid a
+        # large activation-memory spike on small production instances.
+        warmup_batch = np.zeros((1, IMG_SIZE, IMG_SIZE, 3), dtype=np.float32)
         with self._predict_lock:
             _ = keras.ops.convert_to_numpy(self.model(warmup_batch, training=False))
         self.load_time_ms = round((time.perf_counter() - load_started) * 1000, 1)
@@ -75,11 +77,15 @@ class FoodLensModel:
         x_crop = np.asarray(img_crop, dtype=np.float32)
         
         variants = [x_base, x_flip, x_crop] if use_tta else [x_base]
-        x_batch = np.stack(variants)
-        
-        # Forward pass on all variations
+        # Run TTA views sequentially. This preserves the same probability
+        # average while using much less peak memory than a three-image batch.
         with self._predict_lock:
-            preds = keras.ops.convert_to_numpy(self.model(x_batch, training=False))
+            preds = np.stack([
+                keras.ops.convert_to_numpy(
+                    self.model(np.expand_dims(variant, 0), training=False)
+                )[0]
+                for variant in variants
+            ])
         
         # Average the probabilities across the 3 augmented versions
         probs = np.mean(preds, axis=0)
