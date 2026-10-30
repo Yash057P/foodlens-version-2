@@ -350,6 +350,23 @@ body {
 .preview-actions .btn { flex: 1; }
 .preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .preview-label { color: var(--text-secondary); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+
+.demo-samples { margin-top: 16px; padding: 18px; background: var(--card); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow-sm); }
+.demo-samples-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.demo-samples-heading h3 { margin: 3px 0 0; font-size: 1rem; }
+.demo-samples > p { margin: 8px 0 14px; color: var(--text-secondary); font-size: 0.78rem; line-height: 1.45; }
+.sample-count { flex: none; color: var(--accent); font-size: 0.72rem; font-weight: 800; }
+.demo-sample-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+.demo-sample { appearance: none; padding: 0; overflow: hidden; color: var(--text-primary); background: var(--track); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; text-align: left; transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
+.demo-sample:hover, .demo-sample:focus-visible { transform: translateY(-2px); border-color: var(--accent); box-shadow: var(--shadow-sm); outline: none; }
+.demo-sample.is-loading { opacity: 0.6; pointer-events: none; }
+.demo-sample img { width: 100%; height: 72px; display: block; object-fit: cover; }
+.demo-sample span { display: block; min-height: 36px; padding: 7px 8px; font-size: 0.68rem; font-weight: 750; line-height: 1.25; }
+
+@media (max-width: 620px) {
+  .demo-sample-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .demo-samples-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
+}
 .btn-icon-sm {
   width: 32px; height: 32px; display: grid; place-items: center;
   border: 0; border-radius: 9px; background: var(--track-soft); color: var(--muted); cursor: pointer;
@@ -630,6 +647,7 @@ body {
 .shutter span { width: 60px; height: 60px; border-radius: 50%; background: #fff; display: block; transition: 0.1s; }
 .shutter:active { transform: scale(0.94); }
 .shutter:active span { background: var(--brand-1); }
+.camera-fallback { min-width: 190px; }
 .cam-hint {
   position: absolute; top: 16px; left: 0; right: 0; text-align: center;
   color: #fff; font-size: 0.85rem; font-weight: 600;

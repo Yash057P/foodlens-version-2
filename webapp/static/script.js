@@ -52,6 +52,7 @@ const fallbackInput = $('fallbackInput');
 const btnSnap = $('btnSnap');
 const btnCamClose = $('btnCamClose');
 const btnFlip = $('btnFlip');
+const btnCameraFallback = $('btnCameraFallback');
 
 let selectedFile = null;
 let stream = null;
@@ -181,8 +182,31 @@ fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
 galleryInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
 $('btnGallery').addEventListener('click', (e) => { e.stopPropagation(); galleryInput.click(); });
 fallbackInput.addEventListener('change', (e) => { 
-  cameraModal.classList.add('hidden'); 
+  closeCamera();
   handleFile(e.target.files[0]); 
+});
+btnCameraFallback.addEventListener('click', () => fallbackInput.click());
+
+document.querySelectorAll('.demo-sample').forEach((button) => {
+  button.addEventListener('click', async () => {
+    if (loading) return;
+    const src = button.dataset.sampleSrc;
+    const label = button.dataset.sampleLabel || 'Food-101 sample';
+    button.classList.add('is-loading');
+    try {
+      const response = await fetch(src);
+      if (!response.ok) throw new Error('The demo image could not be loaded.');
+      const blob = await response.blob();
+      const filename = src.split('/').pop() || 'food101-demo.jpg';
+      handleFile(new File([blob], filename, { type: blob.type || 'image/jpeg' }));
+      previewImg.alt = `${label} Food-101 demo sample`;
+      previewCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (error) {
+      showNotice(error.message || 'The demo image could not be loaded.', true);
+    } finally {
+      button.classList.remove('is-loading');
+    }
+  });
 });
 
 uploadZone.ondragover = (e) => { e.preventDefault(); uploadZone.classList.add('over'); };
@@ -229,6 +253,9 @@ window.addEventListener('pagehide', closeCamera);
 
 async function openCamera() {
   cameraMsg.classList.add('hidden');
+  btnCameraFallback.classList.add('hidden');
+  btnSnap.classList.remove('hidden');
+  cameraModal.classList.remove('hidden');
   
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     try {
@@ -247,12 +274,19 @@ async function openCamera() {
       return;
     } catch (err) {
       console.warn('Camera access failed:', err);
-      showCameraMsg('Camera unavailable. Select an image from the gallery instead.');
+      const permissionDenied = err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
+      showCameraMsg(permissionDenied
+        ? 'Camera permission was denied. Allow camera access in your browser settings, or choose a photo instead.'
+        : 'The camera is unavailable on this device or browser. Choose a photo instead.');
     }
+  } else {
+    showCameraMsg(window.isSecureContext
+      ? 'This browser does not provide camera access. Choose a photo instead.'
+      : 'Camera access requires HTTPS or localhost. Open the secure site or choose a photo instead.');
   }
-  
-  // Fallback to file input
-  setTimeout(() => fallbackInput.click(), 500);
+
+  btnSnap.classList.add('hidden');
+  btnCameraFallback.classList.remove('hidden');
 }
 
 function captureFrame() {
@@ -296,6 +330,25 @@ function showCameraMsg(msg) {
   cameraMsg.classList.remove('hidden'); 
 }
 
+async function readJsonResponse(response) {
+  const contentType = response.headers.get('content-type') || '';
+  const body = await response.text();
+  if (contentType.includes('application/json') && body) {
+    try {
+      return JSON.parse(body);
+    } catch (_error) {
+      // Continue to an actionable server message below.
+    }
+  }
+  if (!response.ok) {
+    if ([502, 503, 504].includes(response.status)) {
+      throw new Error('The hosted AI service is restarting or temporarily out of capacity. Wait about a minute and try again.');
+    }
+    throw new Error(`The server returned an invalid response (HTTP ${response.status}).`);
+  }
+  throw new Error('The server returned an empty or invalid response. Please try again.');
+}
+
 /* ========== ANALYZE ========== */
 btnScan.addEventListener('click', () => analyze(false));
 btnClear.addEventListener('click', resetScan);
@@ -325,7 +378,7 @@ async function analyze(silent) {
   
   try {
     const res = await fetch('/api/predict', { method: 'POST', body: form });
-    const data = await res.json();
+    const data = await readJsonResponse(res);
     
     if (!res.ok || data.status !== 'ok') {
       throw new Error(data.message || 'Server error occurred');

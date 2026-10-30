@@ -52,6 +52,10 @@ images in a local folder and rank them with the running model:
 python scripts\select_viva_samples.py C:\path\to\food-photos
 ```
 
+The scan page also includes 12 one-click examples from the manually reviewed
+Food-101 validation split. Their labels, source rows, and hashes are recorded in
+`webapp/static/demo-food101/MANIFEST.md` for a repeatable viva demonstration.
+
 Visually verify every suggested label. Use one clear high-confidence photograph
 for the successful classification and one difficult or non-food image to explain
 the low-confidence and ambiguity warnings.

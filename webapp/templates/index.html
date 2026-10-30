@@ -150,6 +150,31 @@
             <input type="file" id="galleryInput" accept="image/jpeg,image/png,image/webp" hidden/>
           </div>
 
+          <section class="demo-samples" aria-labelledby="demoSamplesTitle">
+            <div class="demo-samples-heading">
+              <div>
+                <span class="eyebrow">Food-101 validation images</span>
+                <h3 id="demoSamplesTitle">Try a prepared demo image</h3>
+              </div>
+              <span class="sample-count">12 labelled samples</span>
+            </div>
+            <p>Choose an image to load it into the same prediction flow used for uploads and camera photos.</p>
+            <div class="demo-sample-grid">
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/01-beignets.jpg" data-sample-label="Beignets"><img src="/static/demo-food101/01-beignets.jpg" alt="Food-101 sample labelled Beignets" loading="lazy"/><span>Beignets</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/02-beignets-second.jpg" data-sample-label="Beignets, second example"><img src="/static/demo-food101/02-beignets-second.jpg" alt="Second Food-101 sample labelled Beignets" loading="lazy"/><span>Beignets II</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/03-panna_cotta.jpg" data-sample-label="Panna cotta"><img src="/static/demo-food101/03-panna_cotta.jpg" alt="Food-101 sample labelled Panna cotta" loading="lazy"/><span>Panna cotta</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/04-caesar_salad.jpg" data-sample-label="Caesar salad"><img src="/static/demo-food101/04-caesar_salad.jpg" alt="Food-101 sample labelled Caesar salad" loading="lazy"/><span>Caesar salad</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/05-red_velvet_cake.jpg" data-sample-label="Red velvet cake"><img src="/static/demo-food101/05-red_velvet_cake.jpg" alt="Food-101 sample labelled Red velvet cake" loading="lazy"/><span>Red velvet cake</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/06-beef_tartare.jpg" data-sample-label="Beef tartare"><img src="/static/demo-food101/06-beef_tartare.jpg" alt="Food-101 sample labelled Beef tartare" loading="lazy"/><span>Beef tartare</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/07-french_fries.jpg" data-sample-label="French fries"><img src="/static/demo-food101/07-french_fries.jpg" alt="Food-101 sample labelled French fries" loading="lazy"/><span>French fries</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/08-spring_rolls.jpg" data-sample-label="Spring rolls"><img src="/static/demo-food101/08-spring_rolls.jpg" alt="Food-101 sample labelled Spring rolls" loading="lazy"/><span>Spring rolls</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/09-french_fries-second.jpg" data-sample-label="French fries, second example"><img src="/static/demo-food101/09-french_fries-second.jpg" alt="Second Food-101 sample labelled French fries" loading="lazy"/><span>French fries II</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/10-caprese_salad.jpg" data-sample-label="Caprese salad"><img src="/static/demo-food101/10-caprese_salad.jpg" alt="Food-101 sample labelled Caprese salad" loading="lazy"/><span>Caprese salad</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/11-sushi.jpg" data-sample-label="Sushi"><img src="/static/demo-food101/11-sushi.jpg" alt="Food-101 sample labelled Sushi" loading="lazy"/><span>Sushi</span></button>
+              <button class="demo-sample" type="button" data-sample-src="/static/demo-food101/12-paella.jpg" data-sample-label="Paella"><img src="/static/demo-food101/12-paella.jpg" alt="Food-101 sample labelled Paella" loading="lazy"/><span>Paella</span></button>
+            </div>
+          </section>
+
           <div class="preview-card hidden" id="previewCard">
             <div class="preview-header">
               <span class="preview-label">Selected Image</span>
@@ -446,11 +471,12 @@
         </div>
         <div class="shutter-row">
           <button class="shutter" id="btnSnap" aria-label="Capture"><span></span></button>
+          <button class="btn btn-secondary camera-fallback hidden" id="btnCameraFallback" type="button">Choose a photo instead</button>
         </div>
         <div class="camera-msg hidden" id="cameraMsg"></div>
       </div>
     </div>
-    <input type="file" id="fallbackInput" accept="image/jpeg,image/png,image/webp" hidden/>
+    <input type="file" id="fallbackInput" accept="image/jpeg,image/png,image/webp" capture="environment" hidden/>
   </div>
 </div>
 
