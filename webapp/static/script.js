@@ -187,28 +187,6 @@ fallbackInput.addEventListener('change', (e) => {
 });
 btnCameraFallback.addEventListener('click', () => fallbackInput.click());
 
-document.querySelectorAll('.demo-sample').forEach((button) => {
-  button.addEventListener('click', async () => {
-    if (loading) return;
-    const src = button.dataset.sampleSrc;
-    const label = button.dataset.sampleLabel || 'Food-101 sample';
-    button.classList.add('is-loading');
-    try {
-      const response = await fetch(src);
-      if (!response.ok) throw new Error('The demo image could not be loaded.');
-      const blob = await response.blob();
-      const filename = src.split('/').pop() || 'food101-demo.jpg';
-      handleFile(new File([blob], filename, { type: blob.type || 'image/jpeg' }));
-      previewImg.alt = `${label} Food-101 demo sample`;
-      previewCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } catch (error) {
-      showNotice(error.message || 'The demo image could not be loaded.', true);
-    } finally {
-      button.classList.remove('is-loading');
-    }
-  });
-});
-
 uploadZone.ondragover = (e) => { e.preventDefault(); uploadZone.classList.add('over'); };
 uploadZone.ondragleave = () => uploadZone.classList.remove('over');
 uploadZone.ondrop = (e) => {
