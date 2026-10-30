@@ -374,7 +374,7 @@ async function analyze(silent) {
     }
     
     renderResults(data);
-    addToHistory(data);
+    await addToHistory(data);
   } catch (err) {
     showNotice(err.message || 'Failed to analyze image. Please try again.', true);
   } finally {
@@ -760,8 +760,31 @@ function loadHistory() {
   }
 }
 
-function addToHistory(data) {
-  const thumb = previewImg.src;
+async function createHistoryThumbnail(file) {
+  if (!file) return '';
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onerror = () => resolve('');
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => resolve('');
+      image.onload = () => {
+        const maxSide = 160;
+        const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function addToHistory(data) {
+  const thumb = await createHistoryThumbnail(selectedFile);
   history.unshift({
     id: Date.now(),
     food: data.lead_name || 'Unknown',
@@ -792,9 +815,14 @@ function renderHistory() {
     return;
   }
   
-  historyList.innerHTML = history.map((h) => `
+  historyList.innerHTML = history.map((h) => {
+    const hasPersistentThumb = typeof h.thumb === 'string' && h.thumb.startsWith('data:image/');
+    const thumbnail = hasPersistentThumb
+      ? `<img class="hist-thumb" src="${escapeHtml(h.thumb)}" alt="${escapeHtml(h.food)}"/>`
+      : `<div class="hist-thumb hist-thumb-fallback" aria-hidden="true">${escapeHtml((h.food || '?').slice(0, 1).toUpperCase())}</div>`;
+    return `
     <div class="hist-item">
-      <img class="hist-thumb" src="${escapeHtml(h.thumb)}" alt="${escapeHtml(h.food)}"/>
+      ${thumbnail}
       <div class="hist-info">
         <div class="hist-food">${escapeHtml(h.food)}</div>
         <div class="hist-sub">${h.conf}% | ${formatDate(h.ts)}</div>
@@ -802,7 +830,8 @@ function renderHistory() {
       <button class="hist-del" data-id="${h.id}" aria-label="Delete entry">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
     
   // Add delete handlers
   historyList.querySelectorAll('.hist-del').forEach((b) => {
