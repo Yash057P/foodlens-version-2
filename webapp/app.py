@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
+from flask_compress import Compress
 from PIL import Image, UnidentifiedImageError
 
 # Add webapp directory to path for imports
@@ -31,6 +32,18 @@ app = Flask(
     static_folder=str(Path(__file__).resolve().parent / "static"),
     template_folder=str(Path(__file__).resolve().parent / "templates"),
 )
+app.config.update(
+    COMPRESS_MIMETYPES=[
+        "application/json",
+        "application/javascript",
+        "image/svg+xml",
+        "text/css",
+        "text/html",
+        "text/javascript",
+    ],
+    COMPRESS_MIN_SIZE=500,
+)
+Compress(app)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "foodlens-dev-key-change-in-production")
 app.config["UPLOAD_FOLDER"] = Path(__file__).resolve().parent / "uploads"
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB
@@ -57,6 +70,26 @@ def add_cors_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Permissions-Policy"] = "camera=(self), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "base-uri 'self'; "
+        "connect-src 'self'; "
+        "font-src 'self'; "
+        "form-action 'self'; "
+        "frame-ancestors 'none'; "
+        "img-src 'self' blob: data:; "
+        "media-src 'self' blob:; "
+        "object-src 'none'; "
+        "script-src 'self'; "
+        "script-src-attr 'none'; "
+        "style-src 'self'; "
+        "style-src-attr 'unsafe-inline';"
+    )
+    forwarded_proto = request.headers.get("X-Forwarded-Proto", "").split(",", 1)[0].strip()
+    if request.is_secure or forwarded_proto == "https":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
 

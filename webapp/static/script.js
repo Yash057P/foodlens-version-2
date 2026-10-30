@@ -44,6 +44,16 @@ const ttaToggle = $('ttaToggle');
 const thresholdRange = $('thresholdRange');
 const modelToolStatus = $('modelToolStatus');
 
+// Apply the saved theme from the external bundle so a strict script policy can
+// reject inline code without changing user preferences.
+try {
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-theme', 'dark');
+} catch (_error) {
+  // Storage can be unavailable in privacy modes; the default remains usable.
+}
+
 // Camera elements
 const cameraModal = $('cameraModal');
 const cameraVideo = $('cameraVideo');
@@ -171,6 +181,7 @@ function navigate(page) {
 }
 
 $('btnBack').style.visibility = 'hidden';
+$('btnDiscoverDish').addEventListener('click', () => navigate('scan'));
 
 /* ========== UPLOAD ========== */
 uploadZone.addEventListener('click', (e) => {

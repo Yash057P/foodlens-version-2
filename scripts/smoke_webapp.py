@@ -98,7 +98,12 @@ def main() -> None:
         page.evaluate("window.scrollTo(0, 0)")
         page.get_by_role("button", name="Model evaluation").first.click()
         assert page.locator("#page-evaluation").is_visible()
-        page.wait_for_function("document.querySelector('#evaluationMetrics').textContent.includes('88.21%')")
+        for _ in range(50):
+            if "88.21%" in page.locator("#evaluationMetrics").inner_text():
+                break
+            page.wait_for_timeout(100)
+        else:
+            raise AssertionError("Evaluation metrics did not load")
         page.evaluate("window.scrollTo(0, 0)")
         page.wait_for_timeout(300)
         page.screenshot(path=str(screenshot), full_page=True)
